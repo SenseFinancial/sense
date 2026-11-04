@@ -1,0 +1,25 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+   defaults:
+      run:
+        working-directory: ./src/transactions
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+          run: npm install
+          
+      - name: Run tests
+          run: npm run test:e2e
