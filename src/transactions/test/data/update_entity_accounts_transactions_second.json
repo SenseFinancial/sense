@@ -1,0 +1,100 @@
+{
+    "data": {
+        "accounts": [
+            {
+                "account_id": "EXdydNVXxkHqDKJp3ZykfAJRoggbZgHg9abKW",
+                "apy": 0,
+                "balances": {
+                    "available": 100,
+                    "current": 130,
+                    "iso_currency_code": "CA1",
+                    "limit": null,
+                    "unofficial_currency_code": null
+                },
+                "holder_category": "personal",
+                "mask": "0000",
+                "name": "Plaid Checking1",
+                "official_name": "Plaid Gold Standard 0% Interest Checking",
+                "subtype": "checking1",
+                "type": "depository1"
+            }
+        ],
+        "modified": [
+            {
+                "account_id": "EXdydNVXxkHqDKJp3ZykfAJRoggbZgHg9abKW",
+                "account_owner": null,
+                "amount": 8,
+                "authorized_date": "2026-10-23",
+                "authorized_datetime": null,
+                "category": [
+                    "Travel",
+                    "Taxi"
+                ],
+                "category_id": "22016000",
+                "check_number": null,
+                "counterparties": [
+                    {
+                        "confidence_level": "VERY_HIGH",
+                        "entity_id": "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
+                        "logo_url": "https://plaid-merchant-logos.plaid.com/uber_1060.png",
+                        "name": "Uber",
+                        "phone_number": null,
+                        "type": "merchant",
+                        "website": "uber.com"
+                    }
+                ],
+                "date": "2026-10-25",
+                "datetime": null,
+                "iso_currency_code": "CA1",
+                "location": {
+                    "address": "123 Elsewhere St",
+                    "city": "Vancouver1",
+                    "country": "C1",
+                    "lat": null,
+                    "lon": null,
+                    "postal_code": "V2V 2V2",
+                    "region": "BC1",
+                    "store_number": null
+                },
+                "logo_url": "https://plaid-merchant-logos.plaid.com/uber_1060.png",
+                "merchant_category_code": "4121",
+                "merchant_entity_id": "merchant ID!",
+                "merchant_name": "Uber1",
+                "name": "Uber 072515 SF**POOL**",
+                "original_description": "Uber 072515 SF**POOL**1",
+                "payment_channel": "online1",
+                "payment_meta": {
+                    "by_order_of": null,
+                    "payee": null,
+                    "payer": null,
+                    "payment_method": null,
+                    "payment_processor": null,
+                    "ppd_id": null,
+                    "reason": null,
+                    "reference_number": null
+                },
+                "pending": false,
+                "pending_transaction_id": null,
+                "personal_finance_category": {
+                    "confidence_level": "VERY_HIGH",
+                    "detailed": "TRANSPORTATION_TAXIS_AND_RIDE_SHARES1",
+                    "primary": "TRANSPORTATION1",
+                    "version": "v2"
+                },
+                "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_TRANSPORTATION.png",
+                "running_balance": null,
+                "transaction_code": "code1",
+                "transaction_id": "gqxyxAMqemuR5aGgQ1vEu7AWDzB7pmcE4485D",
+                "transaction_type": "special",
+                "unofficial_currency_code": null,
+                "website": "uber.com"
+            }
+        ],
+        "has_more": false,
+        "added": [],
+        "next_cursor": "it is a cursor!",
+        "removed": [],
+        "request_id": "a95aa5bfa73a416",
+        "transactions_update_status": "HISTORICAL_UPDATE_COMPLETE"
+    }
+}
