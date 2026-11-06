@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
     const { public_token } = await req.json();
     try {
         const response = await client.itemPublicTokenExchange({ public_token });
-        const { access_token } = response.data;
-        return NextResponse.json({ access_token });
+        const { access_token, item_id } = response.data;
+        return NextResponse.json({ access_token, item_id });
     } catch (error) {
         return NextResponse.json({ error: 'Error exchanging public token' }, { status: 500 });
     }

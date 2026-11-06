@@ -1,17 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
-import { Products, Transaction } from 'plaid';
-import { PlaidAuthenticationService } from './plaid/plaidAuthenticationService';
+import { Controller, Get, Query } from '@nestjs/common';
 import { PlaidTransactionsService } from './plaid/plaidTransactionsService';
-import { Database } from './database/database';
 
 @Controller()
 export class AppController {
-  constructor(private readonly authenticationService: PlaidAuthenticationService, private readonly transactionsService: PlaidTransactionsService, private readonly database: Database) { }
+  constructor(private readonly transactionsService: PlaidTransactionsService) { }
 
-  @Get()
-  async transactionsSync() {
-    const metaData = await this.authenticationService.getSandboxMetaData("ins_109508", [Products.Transactions]);
-
-    await this.transactionsService.transactionsSync(metaData.accessToken, metaData.itemId); // Sandbox has a specific ItemId, whereas the UI allows us to select one
+  @Get('beginTransactionsSync')
+  async beginTransactionsSync(@Query('accessToken') accessToken: string, @Query('itemId') itemId: string) {
+    const status = await this.transactionsService.transactionsSync(accessToken, itemId);
+    return {
+      transactionsUpdateStatus: status
+    };
   }
 }

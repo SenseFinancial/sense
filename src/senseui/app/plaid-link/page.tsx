@@ -23,8 +23,11 @@ const PlaidLinkComponent = () => {
             const response = await axios.post('/api/plaid/exchange-token', {
                 public_token,
             });
-            // TODO: send token to server for storage with itemId
-            console.log('Access Token:', response.data.access_token);
+
+            await axios.post('/api/transactions/transactionsSync', {
+                accessToken: response.data.access_token,
+                itemId: response.data.item_id
+            });
         } catch (error) {
             console.error('Error exchanging public token:', error);
         }
