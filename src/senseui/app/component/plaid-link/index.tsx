@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import axios from 'axios';
 
-const PlaidLinkComponent = () => {
+export default function PlaidLink({ onSuccess }: { onSuccess: () => void }) {
     const [linkToken, setLinkToken] = useState<string | null>(null);
     useEffect(() => {
         const createLinkToken = async () => {
@@ -18,7 +18,7 @@ const PlaidLinkComponent = () => {
         };
         createLinkToken();
     }, []);
-    const onSuccess = async (public_token: string | null) => {
+    const onCreateLinkTokenSuccess = async (public_token: string | null) => {
         try {
             const response = await axios.post('/api/plaid/exchange-token', {
                 public_token,
@@ -28,13 +28,15 @@ const PlaidLinkComponent = () => {
                 accessToken: response.data.access_token,
                 itemId: response.data.item_id
             });
+
+            onSuccess();
         } catch (error) {
             console.error('Error exchanging public token:', error);
         }
     };
     const { open, ready } = usePlaidLink({
         token: linkToken!,
-        onSuccess,
+        onSuccess: onCreateLinkTokenSuccess,
     });
     return (
         <div>
@@ -45,5 +47,4 @@ const PlaidLinkComponent = () => {
             )}
         </div>
     );
-};
-export default PlaidLinkComponent;
+}

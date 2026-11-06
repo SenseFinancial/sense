@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
                 break;
         }
 
-        return NextResponse.json({ link_token: response.data.link_token });
+        return NextResponse.json({}, { status: 200 });
     } catch (error) {
         if (axios.isAxiosError(error)) {
             console.log(`Error: ${error.response?.data.error_code} ${error.response?.data.error_message}.`);
