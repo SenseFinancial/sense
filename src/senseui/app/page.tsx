@@ -59,6 +59,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <div className="text-xs mb-2">
+        By clicking "Connect Bank" you give consent for Sense to collect, process and store your consumer data.
+      </div>
       <PlaidLink onSuccess={onPlaidLinkSuccess} />
       <Toast isOpen={isToastOpen} onRequestClose={() => setToastOpen(false)} message="You have successfully linked your account. If this was the real product, there would be more here, but it isn't. Thanks for participating in our prototype!" />
     </div>
