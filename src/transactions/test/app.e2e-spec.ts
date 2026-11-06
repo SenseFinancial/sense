@@ -7,7 +7,6 @@ import { Pool } from 'pg';
 import { runner } from 'node-pg-migrate';
 import { AppModule } from '../src/app.module';
 import { PlaidClientApiWrapperService } from '../src/plaid/plaidClientApiWrapperService';
-import { PlaidAuthenticationService } from '../src/plaid/plaidAuthenticationService';
 import { Configuration } from '../src/infrastructure/configuration';
 import { PoolFactory } from '../src/database/poolFactory';
 
@@ -45,8 +44,6 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
       .useValue(testingConfiguration)
       .overrideProvider(PlaidClientApiWrapperService)
       .useValue(testingPlaidClientApiWrapperService)
-      .overrideProvider(PlaidAuthenticationService)
-      .useValue(testingPlaidAuthenticationService)
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -67,7 +64,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_add_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/')
+      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -76,6 +73,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('HISTORICAL_UPDATE_COMPLETE');
     expect(entityResp.rows[0].nextCursor).toEqual('CAESJXZRb2pvNWdRejhVZ2R3QVp4RE5FRjVhcmp5MUxlZHRxUG80NHcaDAjBm6jXBhCIzLGoAyIMCMGbqNcGEIjMsagDKgwIwZuo1wYQiMyxqAM=');
     expect(entityResp.rows[0].lastRequestId).toEqual('a95aa5bfa73a416');
+    expect(entityResp.rows[0].accessToken).toEqual('sandBoxAccessToken');
 
     const accountResp = await pool.query(`SELECT * FROM account WHERE "entityId" = $1`, [entityResp.rows[0].id]);
     expect(accountResp.rowCount).toEqual(5);
@@ -131,7 +129,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     }
 
     await request(app.getHttpServer())
-      .get('/')
+      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -140,6 +138,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('HISTORICAL_UPDATE_COMPLETE');
     expect(entityResp.rows[0].nextCursor).toEqual('it is a cursor!'); // this changed between first and second
     expect(entityResp.rows[0].lastRequestId).toEqual('a95aa5bfa73a416');
+    expect(entityResp.rows[0].accessToken).toEqual('sandBoxAccessToken');
 
     const accountResp = await pool.query(`SELECT * FROM account WHERE "entityId" = $1`, [entityResp.rows[0].id]);
     expect(accountResp.rowCount).toEqual(1);
@@ -174,7 +173,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_remove_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/')
+      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -195,12 +194,6 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
   let testingPoolFactory = {
     getPool: () => { },
     shutdownPool: () => { } // don't end pool at app shutdown, test will manage it
-  };
-
-  let testingPlaidAuthenticationService = {
-    getSandboxMetaData: () => {
-      return { accessToken: 'sandBoxAccessToken', itemId: 'sandBoxItemId' };
-    }
   };
 
   let testingPlaidClientApiWrapperService = {

@@ -31,7 +31,7 @@ export class Database implements OnApplicationShutdown {
         )
     }
 
-    addOrUpdateEntity = async (providerEntityId: string, transactionsUpdateStatus: string, nextCursor: string, lastRequestId: string) => {
+    addOrUpdateEntity = async (providerEntityId: string, transactionsUpdateStatus: string, nextCursor: string, lastRequestId: string, accessToken: string) => {
         const res = await this.pool.query(`SELECT EXISTS(
                 SELECT 1 
                 FROM entity 
@@ -43,16 +43,17 @@ export class Database implements OnApplicationShutdown {
                     "transactionsUpdateStatus" = $2,
                     "nextCursor" = $3,
                     "lastRequestId" = $4,
-                    "modifiedAt" = CURRENT_TIMESTAMP
+                    "modifiedAt" = CURRENT_TIMESTAMP,
+                    "accessToken" = $5
                 WHERE "providerEntityId" = $1
                 RETURNING id`,
-                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId]
+                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, accessToken]
             );
             return ret.rows[0].id;
         } else {
             const ret = await this.pool.query(
-                'INSERT INTO entity("providerEntityId", "transactionsUpdateStatus", "nextCursor", "lastRequestId") VALUES($1, $2, $3, $4) RETURNING id',
-                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId]);
+                'INSERT INTO entity("providerEntityId", "transactionsUpdateStatus", "nextCursor", "lastRequestId", "accessToken") VALUES($1, $2, $3, $4, $5) RETURNING id',
+                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, accessToken]);
             return ret.rows[0].id;
         }
     };
