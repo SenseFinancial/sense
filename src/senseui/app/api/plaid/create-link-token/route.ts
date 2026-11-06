@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
             user: { client_user_id },
             client_name: 'Sense',
             products: [
-                Products.Auth,
                 Products.Transactions,
             ],
             country_codes: [CountryCode.Ca],
