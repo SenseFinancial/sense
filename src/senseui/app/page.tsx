@@ -2,9 +2,9 @@ import PlaidLinkComponent from "./plaid-link/page";
 
 export default function Home() {
   return (
-    <div className="container mx-auto p-4 w-2xl">
-      <div className="flex">
-        <div className="p-4 rounded shadow mb-4 mr-4 bg-blue-100 flex-2">
+    <div className="container mx-auto p-4 max-w-2xl">
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <div className="p-4 rounded shadow bg-blue-100 flex-2">
           <div className="text-3xl font-bold mb-2">
             What Is This?
           </div>
@@ -26,7 +26,7 @@ export default function Home() {
             Clicking "Connect Bank" below will open a pop-up from our trusted data provider Plaid. In the pop-up, you will select the bank or credit union
             where you do most of your banking, then enter your credentials for them.
           </div>
-          <div className="mb-2 flex">
+          <div className="flex">
             <div>
               <svg className="w-6 h-6 mr-2 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4.5V19a1 1 0 0 0 1 1h15M7 14l4-4 4 4 5-5m0 0h-3.207M20 9v3.207" />
@@ -36,7 +36,7 @@ export default function Home() {
             When you're done the process, Plaid will share your bank transactions with us, and then we'll do some magic math and be able to show you some great graphs and charts about your money!
           </div>
         </div>
-        <div className="mb-4 flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
           <div className="p-4 rounded shadow bg-green-100 mb-4">
             Sense Financial never sees or holds your banking credentials.
           </div>
