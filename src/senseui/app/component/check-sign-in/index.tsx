@@ -1,6 +1,6 @@
 "use client"
-import authClient from './../../auth-client';
-import SignInButton from "./../sign-in-button";
+import authClient from '@/app/auth-client';
+import SignInButton from "@/app/component/sign-in-button";
 
 export default function CheckSignIn({ children }: { children: React.ReactNode }) {
     const { data: session, isPending } = authClient.useSession();

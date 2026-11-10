@@ -1,5 +1,5 @@
 import Image from "next/image";
-import SenseLogo from '../public/sense.png'
+import SenseLogo from '@/public/sense.png'
 
 export default function TopNav() {
     return (

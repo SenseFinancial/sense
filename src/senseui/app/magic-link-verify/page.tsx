@@ -1,7 +1,7 @@
 "use client"
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import authClient from "../auth-client";
+import authClient from "@/app/auth-client";
 
 export default function MagicLinkVerify() {
     return (

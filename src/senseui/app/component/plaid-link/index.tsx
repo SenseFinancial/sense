@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import axios from 'axios';
-import Button from './../button';
+import Button from '@/app/component/button';
 
 export default function PlaidLink({ onSuccess }: { onSuccess: () => void }) {
     const [linkToken, setLinkToken] = useState<string | null>(null);

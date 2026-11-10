@@ -1,9 +1,9 @@
 "use client"
 import { useState } from 'react';
 import { QRCodeSVG } from "qrcode.react";
-import Button from "../component/button";
-import CheckSignIn from "../component/check-sign-in"
-import authClient from './../auth-client';
+import Button from "@/app/component/button";
+import CheckSignIn from "@/app/component/check-sign-in"
+import authClient from '@/app/auth-client';
 
 export default function UsersPage() {
     const [totpUri, setTotpUri] = useState<string | null>(null);
