@@ -18,15 +18,14 @@ export const auth = betterAuth({
         magicLink({
             sendMagicLink: async ({ email, token, url, metadata }, ctx) => {
                 // TODO: send email to user
-                console.log('EMAIL');
-                console.log(email);
-                console.log(token);
-                console.log(url);
-                console.log(metadata);
-                console.log(`https://localhost:3000/magic-link-verify?token=${token}`)
+                //console.log(email);
+                //console.log(token);
+                //console.log(metadata);
+                console.log(`NOT MFA ${url}`);
+                console.log(`MFA: https://localhost:3000/magic-link-verify?token=${token}`)
             }
         }),
-        twoFactor()
+        twoFactorPlugin
     ],
     hooks: {
         after: createAuthMiddleware(async (ctx) => {

@@ -19,14 +19,11 @@ function CodeInput() {
     const router = useRouter();
 
     async function onSignInClick() {
-        const { data } = await authClient.magicLink.verify({ query: { token } });
-
-        if (data?.user.twoFactorEnabled) {
-            const { error } = await authClient.twoFactor.verifyTotp({ code, trustDevice: false });
-            if (error) {
-                setError(error.message || '');
-                return;
-            }
+        await authClient.magicLink.verify({ query: { token } });
+        const { error } = await authClient.twoFactor.verifyTotp({ code, trustDevice: false });
+        if (error) {
+            setError(error.message || '');
+            return;
         }
         router.push('/');
     }

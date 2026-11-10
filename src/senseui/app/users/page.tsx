@@ -10,28 +10,41 @@ export default function UsersPage() {
     const [totpUri, setTotpUri] = useState<string | null>(null);
     const [code, setCode] = useState("");
     const { data: session } = authClient.useSession();
-    const [isMfaEnabled, setIsMfaEnabled] = useState(session?.user?.twoFactorEnabled);
+    const isMfaEnabled = session?.user?.twoFactorEnabled;
 
     async function onEnableMfaClick() {
-        const { data } = await authClient.twoFactor.enable({ method: "totp" });
-
-        if (data && data.method === "totp")
+        const { data, error } = await authClient.twoFactor.enable({ method: "totp" });
+        if (error) {
+            console.log(error);
+        } else if (data && data.method === "totp") {
             setTotpUri(data.totpURI);
+        }
     }
 
     async function onDisableMfaClick() {
         await axios.post('/api/auth/disable-mfa', {
             user_id: session?.user.id
         });
-        setIsMfaEnabled(false);
+        await authClient.revokeSessions();
+        authClient.signOut();
     }
 
     async function onVerifyClick() {
-        await authClient.twoFactor.verifyTotp({
+        const { error } = await authClient.twoFactor.verifyTotp({
             code: code,
             trustDevice: true
         });
+        if (error) {
+            console.log(error);
+        }
     };
+
+    async function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            await onVerifyClick();
+        }
+    }
 
     return (
         <CheckSignIn>
@@ -45,17 +58,21 @@ export default function UsersPage() {
                         ) : !totpUri ? (
                             <Button onClick={onEnableMfaClick}>Enable MFA</Button>
                         ) : (
-                            <div>
-                                <p>Scan this QR code with your Authenticator app:</p>
-                                <QRCodeSVG value={totpUri} size={200} />
+                            <div className="max-w-sm rounded overflow-hidden shadow-lg p-4 flex flex-col gap-4 m-auto">
+                                <div>Scan with your Authenticator app</div>
+                                <QRCodeSVG value={totpUri} size={200} className="ml-3" />
 
-                                <input
-                                    type="text"
-                                    placeholder="Enter 6-digit code"
-                                    value={code}
-                                    onChange={(e) => setCode(e.target.value)}
-                                />
-                                <button onClick={onVerifyClick}>Verify & Activate</button>
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter 6-digit code"
+                                        value={code}
+                                        onChange={(e) => setCode(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    />
+                                </div>
+                                <Button onClick={onVerifyClick} className="w-fit">Verify</Button>
                             </div>
                         )}
             </div>
