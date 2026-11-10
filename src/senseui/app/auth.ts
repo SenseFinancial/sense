@@ -7,11 +7,13 @@ const twoFactorPlugin = twoFactor({
     allowPasswordless: true
 });
 
+export const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+});
+
 export const auth = betterAuth({
     appName: "Sense",
-    database: new Pool({
-        connectionString: process.env.DATABASE_URL
-    }),
+    database: pool,
     plugins: [
         magicLink({
             sendMagicLink: async ({ email, token, url, metadata }, ctx) => {

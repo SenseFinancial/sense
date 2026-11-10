@@ -4,18 +4,26 @@ import { QRCodeSVG } from "qrcode.react";
 import Button from "@/app/component/button";
 import CheckSignIn from "@/app/component/check-sign-in"
 import authClient from '@/app/auth-client';
+import axios from 'axios';
 
 export default function UsersPage() {
     const [totpUri, setTotpUri] = useState<string | null>(null);
     const [code, setCode] = useState("");
     const { data: session } = authClient.useSession();
-    const isMfaEnabled = session?.user?.twoFactorEnabled;
+    const [isMfaEnabled, setIsMfaEnabled] = useState(session?.user?.twoFactorEnabled);
 
     async function onEnableMfaClick() {
         const { data } = await authClient.twoFactor.enable({ method: "totp" });
 
         if (data && data.method === "totp")
             setTotpUri(data.totpURI);
+    }
+
+    async function onDisableMfaClick() {
+        await axios.post('/api/auth/disable-mfa', {
+            user_id: session?.user.id
+        });
+        setIsMfaEnabled(false);
     }
 
     async function onVerifyClick() {
@@ -30,8 +38,11 @@ export default function UsersPage() {
             <div className="p-4">
                 {
                     isMfaEnabled
-                        ? <div>MFA is enabled.</div>
-                        : !totpUri ? (
+                        ? (
+                            <div>
+                                <Button onClick={onDisableMfaClick}>Disable MFA</Button>
+                            </div>
+                        ) : !totpUri ? (
                             <Button onClick={onEnableMfaClick}>Enable MFA</Button>
                         ) : (
                             <div>
