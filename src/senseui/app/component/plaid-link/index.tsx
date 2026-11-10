@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import axios from 'axios';
+import Button from './../button';
 
 export default function PlaidLink({ onSuccess }: { onSuccess: () => void }) {
     const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -41,9 +42,7 @@ export default function PlaidLink({ onSuccess }: { onSuccess: () => void }) {
     return (
         <div>
             {linkToken && (
-                <button className="bg-blue-500 text-white p-2 rounded-md" onClick={open} disabled={!ready}>
-                    Connect Bank
-                </button>
+                <Button onClick={open} disabled={!ready}>Connect Bank</Button>
             )}
         </div>
     );

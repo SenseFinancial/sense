@@ -3,15 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --experimental-https",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:create": "node --env-file=.env ./createDatabase.mts"
   },
   "dependencies": {
     "axios": "^1.21.0",
+    "better-auth": "^1.7.19",
     "next": "16.4.5",
+    "pg": "^8.23.1",
     "plaid": "^50.0.0",
+    "qrcode.react": "^4.2.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-plaid-link": "^5.0.0"
@@ -19,6 +23,7 @@
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
