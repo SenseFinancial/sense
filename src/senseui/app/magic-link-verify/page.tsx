@@ -2,6 +2,7 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import authClient from "@/app/auth-client";
+import Button from '../component/button';
 
 export default function MagicLinkVerify() {
     return (
@@ -28,16 +29,26 @@ function CodeInput() {
         router.push('/');
     }
 
+    async function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            await onSignInClick();
+        }
+    }
+
     return token ?
         (
-            <div>
+            <div className="max-w-sm rounded overflow-hidden shadow-lg p-4 flex flex-col gap-4 m-auto">
+                Enter MFA from Authenticator
                 <input
                     type="text"
                     placeholder="Enter 6-digit code"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
-                <button onClick={onSignInClick}>Sign In</button>
+                <Button onClick={onSignInClick} className="w-fit">Sign In</Button>
             </div >
         )
         : (
