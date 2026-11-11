@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import "./globals.css";
 import TopNav from "./topnav";
+import Footer from "./footer";
 
 export const metadata: Metadata = {
   title: "Sense Financial Analytics Platform",
@@ -10,9 +11,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex flex-col min-h-svh">
         <TopNav />
-        {children}
+        <div className="grow">
+          {children}
+        </div>
+        <Footer />
       </body>
     </html>
   );
