@@ -4,7 +4,6 @@ import PlaidLink from "./component/plaid-link";
 import Toast from "./component/toast";
 import CheckSignIn from './component/check-sign-in';
 
-
 export default function Home() {
   const [isToastOpen, setToastOpen] = useState(false);
 
