@@ -1,9 +1,8 @@
 import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 import { magicLink, twoFactor } from "better-auth/plugins";
-import { createAuthMiddleware } from "better-auth/api";
+import { createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { headers } from "next/headers";
-import { evalManifestWithRetries } from "next/dist/server/load-components";
 import { NextResponse } from "next/server";
 
 const twoFactorPlugin = twoFactor({
@@ -20,12 +19,12 @@ export const auth = betterAuth({
     plugins: [
         magicLink({
             sendMagicLink: async ({ email, token, url, metadata }, ctx) => {
-                // TODO: send email to user
-                //console.log(email);
-                //console.log(token);
-                //console.log(metadata);
-                console.log(`NOT MFA ${url}`);
-                console.log(`MFA: https://localhost:3000/magic-link-verify?token=${token}`)
+                // Don't want to deal with actually e-mailing right now
+                const enabled = await pool.query('select "twoFactorEnabled" from public.user where email=$1', [email]);
+                if (enabled.rows[0].twoFactorEnabled)
+                    console.log(`https://localhost:3000/magic-link-verify?token=${token}`)
+                else
+                    console.log(url);
             }
         }),
         twoFactorPlugin
