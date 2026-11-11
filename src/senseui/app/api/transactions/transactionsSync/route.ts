@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import TransactionsUpdateStatus from '../transactionsUpdateStatus';
+import { returnNullIfAuthorized } from '@/app/auth';
 
 export async function POST(req: NextRequest) {
+    const auth = await returnNullIfAuthorized();
+    if (auth) return auth;
+
     try {
         const { accessToken, itemId } = await req.json();
         const response = await axios.get(`${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?accessToken=${accessToken}&itemId=${itemId}`);

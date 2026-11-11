@@ -1,3 +1,4 @@
+import { returnNullIfAuthorized } from '@/app/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid';
 
@@ -10,8 +11,13 @@ const config = new Configuration({
         },
     },
 });
+
 const client = new PlaidApi(config);
+
 export async function POST(req: NextRequest) {
+    const auth = await returnNullIfAuthorized();
+    if (auth) return auth;
+
     const { public_token } = await req.json();
     try {
         const response = await client.itemPublicTokenExchange({ public_token });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from 'plaid';
 import axios from 'axios';
+import { returnNullIfAuthorized } from '@/app/auth';
 
 const config = new Configuration({
     basePath: PlaidEnvironments[process.env.PLAID_ENV as keyof typeof PlaidEnvironments],
@@ -15,6 +16,9 @@ const config = new Configuration({
 const client = new PlaidApi(config);
 
 export async function POST(req: NextRequest) {
+    const auth = await returnNullIfAuthorized();
+    if (auth) return auth;
+
     try {
         const { client_user_id } = await req.json();
         const response = await client.linkTokenCreate({
