@@ -7,7 +7,7 @@ export default function Footer() {
 
     return (
         <div className="flex p-4 gap-4">
-            <Link href="https://policyforge.co/policy/privacy-sense-privacy-policy" target='_blank'>Privacy Policy</Link>
+            <Link href="/privacy-policy" target='_blank'>Privacy Policy</Link>
             {session && (<button className="hover:cursor-pointer" onClick={() => authClient.signOut()}>Sign Out</button>)}
         </div>
     );

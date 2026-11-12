@@ -26,3 +26,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Un-reset Tailwind CSS for the privacy policy, since we just copied it from a converter */
+@layer base {
+
+  .privacy-policy * {
+    all: revert;
+  }
+}
