@@ -10,7 +10,15 @@ export async function POST(req: NextRequest) {
 
     try {
         const { accessToken, itemId } = await req.json();
-        const response = await axios.get(`${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?accessToken=${accessToken}&itemId=${itemId}`);
+        const jwt = await generateTransactionsJwt();
+        const response = await axios.get(
+            `${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?accessToken=${accessToken}&itemId=${itemId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${jwt}`
+                }
+            }
+        );
 
         switch (response.data.transactionsUpdateStatus) {
             case TransactionsUpdateStatus.NotReady:
@@ -27,7 +35,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({}, { status: 200 });
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.log(`Error: ${error.response?.data.error_code} ${error.response?.data.error_message}.`);
+            if (error.response)
+                console.log(`Error: ${error.response?.data.error_code} ${error.response?.data.error_message}.`);
+            else
+                console.log(`Error: ${error.code} ${error.message}.`);
         }
         return NextResponse.json({ error: 'Error generating link token' }, { status: 500 });
     }

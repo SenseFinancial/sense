@@ -2,16 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Next.js: Debug Server",
-            "type": "node",
+            "name": "Next.js: debug server-side",
+            "type": "node-terminal",
             "request": "launch",
-            "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
-            "runtimeArgs": [],
-            "skipFiles": [
-                "<node_internals>/**",
-                "${workspaceFolder}/node_modules/**"
-            ],
-            "console": "integratedTerminal"
+            "command": "npm run dev -- --inspect"
         }
     ]
 }
