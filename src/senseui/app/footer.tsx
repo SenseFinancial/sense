@@ -1,6 +1,6 @@
 "use client"
 import Link from 'next/link';
-import authClient from './auth-client';
+import authClient from './auth/auth-client';
 
 export default function Footer() {
     const { data: session } = authClient.useSession();

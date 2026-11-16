@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import TransactionsUpdateStatus from '../transactionsUpdateStatus';
-import { returnNullIfAuthorized } from '@/app/auth';
+import { returnNullIfAuthorized } from '@/app/auth/auth';
+import { generateTransactionsJwt } from '@/app/auth/jwt';
 
 export async function POST(req: NextRequest) {
     const auth = await returnNullIfAuthorized();

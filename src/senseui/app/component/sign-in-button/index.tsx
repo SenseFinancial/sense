@@ -1,6 +1,6 @@
 "use client";
 import Button from "@/app/component/button";
-import authClient from "@/app/auth-client";
+import authClient from "@/app/auth/auth-client";
 
 export default function SignInButton({ onClick, disabled }: React.ComponentPropsWithoutRef<'button'>) {
     async function handleClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {

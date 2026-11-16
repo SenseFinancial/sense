@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { QRCodeSVG } from "qrcode.react";
 import Button from "@/app/component/button";
 import CheckSignIn from "@/app/component/check-sign-in"
-import authClient from '@/app/auth-client';
+import authClient from '@/app/auth/auth-client';
 import axios from 'axios';
 
 export default function UsersPage() {

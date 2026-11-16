@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from 'plaid';
 import axios from 'axios';
-import { returnNullIfAuthorized } from '@/app/auth';
+import { returnNullIfAuthorized } from '@/app/auth/auth';
 
 const config = new Configuration({
     basePath: PlaidEnvironments[process.env.PLAID_ENV as keyof typeof PlaidEnvironments],
