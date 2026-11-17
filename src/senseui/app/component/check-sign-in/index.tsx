@@ -1,6 +1,6 @@
 "use client"
 import { useState } from 'react';
-import authClient from '@/app/auth-client';
+import authClient from '@/app/auth/auth-client';
 import SignInButton from "@/app/component/sign-in-button";
 
 export default function CheckSignIn({ children }: { children: React.ReactNode }) {

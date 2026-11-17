@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool, returnNullIfAuthorized } from '@/app/auth';
+import { pool, returnNullIfAuthorized } from '@/app/auth/auth';
 
 export async function POST(req: NextRequest) {
     const auth = await returnNullIfAuthorized();

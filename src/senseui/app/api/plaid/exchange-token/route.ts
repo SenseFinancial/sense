@@ -1,4 +1,4 @@
-import { returnNullIfAuthorized } from '@/app/auth';
+import { returnNullIfAuthorized } from '@/app/auth/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid';
 
