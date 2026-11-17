@@ -3,12 +3,13 @@ import { Injectable, OnApplicationShutdown } from '@nestjs/common';
 import { Transaction as PlaidTransaction, AccountBase as PlaidAccount, RemovedTransaction } from 'plaid';
 import { Logger } from '../infrastructure/logger';
 import { PoolFactory } from './poolFactory';
+import { Encryption } from '../infrastructure/encryption';
 
 @Injectable()
 export class Database implements OnApplicationShutdown {
     pool: Pool;
 
-    constructor(private readonly poolFactory: PoolFactory, private readonly logger: Logger) {
+    constructor(private readonly poolFactory: PoolFactory, private readonly logger: Logger, private readonly encryption: Encryption) {
         this.pool = poolFactory.getPool();
     }
 
@@ -32,6 +33,9 @@ export class Database implements OnApplicationShutdown {
     }
 
     addOrUpdateEntity = async (providerEntityId: string, transactionsUpdateStatus: string, nextCursor: string, lastRequestId: string, accessToken: string) => {
+        const { encrypted, iv, tag } = this.encryption.encrypt(accessToken);
+        const encryptedAccessToken = `${encrypted}:${iv}:${tag}`;
+
         const res = await this.pool.query(`SELECT EXISTS(
                 SELECT 1 
                 FROM entity 
@@ -47,13 +51,13 @@ export class Database implements OnApplicationShutdown {
                     "accessToken" = $5
                 WHERE "providerEntityId" = $1
                 RETURNING id`,
-                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, accessToken]
+                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, encryptedAccessToken]
             );
             return ret.rows[0].id;
         } else {
             const ret = await this.pool.query(
                 'INSERT INTO entity("providerEntityId", "transactionsUpdateStatus", "nextCursor", "lastRequestId", "accessToken") VALUES($1, $2, $3, $4, $5) RETURNING id',
-                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, accessToken]);
+                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, encryptedAccessToken]);
             return ret.rows[0].id;
         }
     };

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Headers, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Query, Headers, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { PlaidTransactionsService } from './plaid/plaidTransactionsService';
 import { Authentication } from './infrastructure/authentication';
 import { JOSEError } from 'jose/errors';
@@ -21,6 +21,8 @@ export class AppController {
         console.log(error);
         throw new UnauthorizedException('Authentication failed');
       }
+      console.log(error);
+      throw new InternalServerErrorException('Failed to sync transactions.');
     }
   }
 }

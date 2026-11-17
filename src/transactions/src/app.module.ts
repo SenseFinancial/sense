@@ -10,6 +10,7 @@ import { Logger } from './infrastructure/logger';
 import { Configuration } from './infrastructure/configuration';
 import { Authentication } from './infrastructure/authentication';
 import { PoolFactory } from './database/poolFactory';
+import { Encryption } from './infrastructure/encryption';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { PoolFactory } from './database/poolFactory';
     }),
   ],
   controllers: [AppController],
-  providers: [PlaidAuthenticationService, PlaidClientApiWrapperService, PlaidTransactionsService, Database, Logger, Configuration, PoolFactory, Authentication],
+  providers: [PlaidAuthenticationService, PlaidClientApiWrapperService, PlaidTransactionsService, Database, Logger, Configuration, PoolFactory, Authentication, Encryption],
 })
 export class AppModule { }
