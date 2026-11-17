@@ -5,6 +5,7 @@ import { App } from 'supertest/types';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { Pool } from 'pg';
 import { runner } from 'node-pg-migrate';
+import * as crypto from 'crypto';
 import { AppModule } from '../src/app.module';
 import { PlaidClientApiWrapperService } from '../src/plaid/plaidClientApiWrapperService';
 import { Configuration } from '../src/infrastructure/configuration';
@@ -16,7 +17,7 @@ const data_update_entity_accounts_transactions_first = require('./data/update_en
 const data_update_entity_accounts_transactions_second = require('./data/update_entity_accounts_transactions_second.json');
 const data_remove_entity_accounts_transactions = require('./data/remove_entity_accounts_transactions.json');
 
-describe('AppController (e2e) with PostgreSQL integration', () => {
+describe('AppController (e2e), ignore authentication, test database', () => {
   let container: StartedPostgreSqlContainer;
   let pool: Pool;
   let app: INestApplication<App>;
@@ -76,7 +77,10 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('HISTORICAL_UPDATE_COMPLETE');
     expect(entityResp.rows[0].nextCursor).toEqual('CAESJXZRb2pvNWdRejhVZ2R3QVp4RE5FRjVhcmp5MUxlZHRxUG80NHcaDAjBm6jXBhCIzLGoAyIMCMGbqNcGEIjMsagDKgwIwZuo1wYQiMyxqAM=');
     expect(entityResp.rows[0].lastRequestId).toEqual('a95aa5bfa73a416');
-    expect(entityResp.rows[0].accessToken).toEqual('sandBoxAccessToken');
+
+    const accessTokenPieces = entityResp.rows[0].accessToken.split(':');
+    const accessToken = decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
+    expect(accessToken).toEqual('sandBoxAccessToken');
 
     const accountResp = await pool.query(`SELECT * FROM account WHERE "entityId" = $1`, [entityResp.rows[0].id]);
     expect(accountResp.rowCount).toEqual(5);
@@ -141,7 +145,10 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('HISTORICAL_UPDATE_COMPLETE');
     expect(entityResp.rows[0].nextCursor).toEqual('it is a cursor!'); // this changed between first and second
     expect(entityResp.rows[0].lastRequestId).toEqual('a95aa5bfa73a416');
-    expect(entityResp.rows[0].accessToken).toEqual('sandBoxAccessToken');
+
+    const accessTokenPieces = entityResp.rows[0].accessToken.split(':');
+    const accessToken = decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
+    expect(accessToken).toEqual('sandBoxAccessToken');
 
     const accountResp = await pool.query(`SELECT * FROM account WHERE "entityId" = $1`, [entityResp.rows[0].id]);
     expect(accountResp.rowCount).toEqual(1);
@@ -192,6 +199,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
 
   let testingConfiguration = {
     getDatabaseUrl: () => { },
+    getEncryptionKey: () => 'ebed12176f368c6781c26e4b02955ce5f23ce9fe91fe2d991dfc4aab79109b21',
   };
 
   let testingPoolFactory = {
@@ -206,5 +214,19 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
 
   let stubbedAuthenticationService = {
     verifyJwt: () => Promise.resolve()
+  }
+
+  let decrypt = (encrypted: string, iv: string, tag: string): string => {
+    const decipher = crypto.createDecipheriv(
+      'aes-256-gcm',
+      Buffer.from(testingConfiguration.getEncryptionKey(), 'hex'),
+      Buffer.from(iv, 'hex'),
+    );
+    decipher.setAuthTag(Buffer.from(tag, 'hex'));
+
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return decrypted;
   }
 });

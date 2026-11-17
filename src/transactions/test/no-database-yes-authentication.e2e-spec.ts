@@ -9,7 +9,7 @@ import { Configuration } from '../src/infrastructure/configuration';
 import { PlaidTransactionsService } from '../src/plaid/plaidTransactionsService';
 import TransactionsUpdateStatus from '../src/transactionsUpdateStatus';
 
-describe('AppController (e2e) with PostgreSQL integration', () => {
+describe('AppController (e2e) no database, testing authentication', () => {
     let app: INestApplication<App>;
 
     const goodIssuer = "good issuer";
@@ -123,6 +123,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
 
     let testingConfiguration = {
         getDatabaseUrl: () => { },
+        getEncryptionKey: () => 'encryption yay',
         getJwtSecret: () => goodSecret,
         getJwtIssuer: () => goodIssuer,
         getJwtAudience: () => goodAudience

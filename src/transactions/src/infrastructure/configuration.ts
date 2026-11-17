@@ -11,6 +11,7 @@ export class Configuration {
     jwtIssuer: string | undefined;
     jwtAudience: string | undefined;
     jwtSecret: string | undefined;
+    encryptionKey: string;
 
     constructor(private readonly configService: ConfigService) {
         this.databaseUrl = configService.get<string>("DATABASE_URL");
@@ -21,37 +22,20 @@ export class Configuration {
         this.jwtIssuer = configService.get<string>('JWT_ISSUER');
         this.jwtAudience = configService.get<string>('JWT_AUDIENCE');
         this.jwtSecret = configService.get<string>('JWT_SECRET');
+
+        const encryptionKey = configService.get<string>('ENCRYPTION_KEY');
+        if (!encryptionKey)
+            throw new Error('ENCRYPTION_KEY is empty and must not be.');
+        this.encryptionKey = encryptionKey;
     }
 
-    getDatabaseUrl = () => {
-        return this.databaseUrl;
-    }
-
-    getPlaidEnv = () => {
-        return this.plaidEnv;
-    }
-
-    getPlaidClientId = () => {
-        return this.plaidClientId;
-    }
-
-    getPlaidSecretProduction = () => {
-        return this.plaidSecretProduction;
-    }
-
-    getPlaidSecretSandbox = () => {
-        return this.plaidSecretSandbox;
-    }
-
-    getJwtIssuer = () => {
-        return this.jwtIssuer;
-    }
-
-    getJwtAudience = () => {
-        return this.jwtAudience;
-    }
-
-    getJwtSecret = () => {
-        return this.jwtSecret;
-    }
+    getDatabaseUrl = () => this.databaseUrl;
+    getPlaidEnv = () => this.plaidEnv;
+    getPlaidClientId = () => this.plaidClientId;
+    getPlaidSecretProduction = () => this.plaidSecretProduction;
+    getPlaidSecretSandbox = () => this.plaidSecretSandbox;
+    getJwtIssuer = () => this.jwtIssuer;
+    getJwtAudience = () => this.jwtAudience;
+    getJwtSecret = () => this.jwtSecret;
+    getEncryptionKey = () => this.encryptionKey;
 }
