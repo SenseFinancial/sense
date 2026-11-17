@@ -9,6 +9,7 @@ import { AppModule } from '../src/app.module';
 import { PlaidClientApiWrapperService } from '../src/plaid/plaidClientApiWrapperService';
 import { Configuration } from '../src/infrastructure/configuration';
 import { PoolFactory } from '../src/database/poolFactory';
+import { Authentication } from '../src/infrastructure/authentication';
 
 const data_add_entity_accounts_transactions = require('./data/add_entity_accounts_transactions.json');
 const data_update_entity_accounts_transactions_first = require('./data/update_entity_accounts_transactions_first.json');
@@ -44,6 +45,8 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
       .useValue(testingConfiguration)
       .overrideProvider(PlaidClientApiWrapperService)
       .useValue(testingPlaidClientApiWrapperService)
+      .overrideProvider(Authentication)
+      .useValue(stubbedAuthenticationService)
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -188,7 +191,7 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
   });
 
   let testingConfiguration = {
-    getDatabaseUrl: () => { }
+    getDatabaseUrl: () => { },
   };
 
   let testingPoolFactory = {
@@ -200,4 +203,8 @@ describe('AppController (e2e) with PostgreSQL integration', () => {
     // Only have to stub this one, because we stubbed all of the PlaidAuthenticationService (which calls the authentication methods on wrapper)
     transactionsSync: (accessToken: string, cursor: string) => { }
   };
+
+  let stubbedAuthenticationService = {
+    verifyJwt: () => Promise.resolve()
+  }
 });

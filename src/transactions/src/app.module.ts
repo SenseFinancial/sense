@@ -8,6 +8,7 @@ import { PlaidTransactionsService } from './plaid/plaidTransactionsService';
 import { Database } from './database/database';
 import { Logger } from './infrastructure/logger';
 import { Configuration } from './infrastructure/configuration';
+import { Authentication } from './infrastructure/authentication';
 import { PoolFactory } from './database/poolFactory';
 
 @Module({
@@ -17,6 +18,6 @@ import { PoolFactory } from './database/poolFactory';
     }),
   ],
   controllers: [AppController],
-  providers: [PlaidAuthenticationService, PlaidClientApiWrapperService, PlaidTransactionsService, Database, Logger, Configuration, PoolFactory],
+  providers: [PlaidAuthenticationService, PlaidClientApiWrapperService, PlaidTransactionsService, Database, Logger, Configuration, PoolFactory, Authentication],
 })
 export class AppModule { }
