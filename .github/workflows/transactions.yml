@@ -1,12 +1,14 @@
-name: Node.js CI
+name: Transactions Service
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - './src/transactions/**' # Only trigger if files in this subfolder change
+      - './src/transactions/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - './src/transactions/**'
 
 defaults:
   run:

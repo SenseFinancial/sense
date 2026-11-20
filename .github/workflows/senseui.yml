@@ -1,0 +1,32 @@
+name: SenseUI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - './src/senseui/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - './src/senseui/**'
+
+defaults:
+  run:
+    working-directory: ./src/senseui
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Install dependencies
+      run: npm install
+
+    - run: npm run test:e2e

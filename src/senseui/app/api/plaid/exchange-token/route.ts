@@ -1,6 +1,7 @@
-import { returnNullIfAuthorized } from '@/app/auth/auth';
+import { returnNullIfAuthorized } from '@/app/auth/utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid';
+import axios from 'axios';
 
 const config = new Configuration({
     basePath: PlaidEnvironments[process.env.PLAID_ENV as keyof typeof PlaidEnvironments],
@@ -24,6 +25,14 @@ export async function POST(req: NextRequest) {
         const { access_token, item_id } = response.data;
         return NextResponse.json({ access_token, item_id });
     } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.response)
+                console.log(`Error: ${error.response?.data.error_code} ${error.response?.data.error_message}.`);
+            else
+                console.log(`Error: ${error.code} ${error.message}.`);
+        } else {
+            console.log(error);
+        }
         return NextResponse.json({ error: 'Error exchanging public token' }, { status: 500 });
     }
 }
