@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import TransactionsUpdateStatus from '../transactionsUpdateStatus';
-import { returnNullIfAuthorized } from '@/app/auth/auth';
+import { returnNullIfAuthorized } from '@/app/auth/utils';
 import { generateTransactionsJwt } from '@/app/auth/jwt';
 
 export async function POST(req: NextRequest) {
@@ -39,7 +39,10 @@ export async function POST(req: NextRequest) {
                 console.log(`Error: ${error.response?.data.error_code} ${error.response?.data.error_message}.`);
             else
                 console.log(`Error: ${error.code} ${error.message}.`);
+        } else {
+            console.log(error);
         }
+
         return NextResponse.json({ error: 'Error generating link token' }, { status: 500 });
     }
 }

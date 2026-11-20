@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from 'plaid';
 import axios from 'axios';
-import { returnNullIfAuthorized } from '@/app/auth/auth';
+import { returnNullIfAuthorized } from '@/app/auth/utils';
 
 const config = new Configuration({
     basePath: PlaidEnvironments[process.env.PLAID_ENV as keyof typeof PlaidEnvironments],
@@ -33,7 +33,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ link_token: response.data.link_token });
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.log(`Error: ${error.response?.data.error_code} ${error.response?.data.error_message}.`);
+            if (error.response)
+                console.log(`Error: ${error.response?.data.error_code} ${error.response?.data.error_message}.`);
+            else
+                console.log(`Error: ${error.code} ${error.message}.`);
+        } else {
+            console.log(error);
         }
         return NextResponse.json({ error: 'Error generating link token' }, { status: 500 });
     }

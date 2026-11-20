@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { returnNullIfAuthorized } from '@/app/auth/auth';
+import { returnNullIfAuthorized } from '@/app/auth/utils';
 import AuthDatabase from '@/app/auth/authDatabase';
 
 export async function POST(req: NextRequest) {
