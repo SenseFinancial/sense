@@ -11,6 +11,8 @@ import { PlaidClientApiWrapperService } from '../src/plaid/plaidClientApiWrapper
 import { Configuration } from '../src/infrastructure/configuration';
 import { PoolFactory } from '../src/database/poolFactory';
 import { Authentication } from '../src/infrastructure/authentication';
+import TransactionsUpdateStatus from '../src/transactionsUpdateStatus';
+import { Encryption } from '../src/infrastructure/encryption';
 
 const data_add_entity_accounts_transactions = require('./data/add_entity_accounts_transactions.json');
 const data_update_entity_accounts_transactions_first = require('./data/update_entity_accounts_transactions_first.json');
@@ -68,7 +70,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_add_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
+      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=asdf')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -77,6 +79,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('HISTORICAL_UPDATE_COMPLETE');
     expect(entityResp.rows[0].nextCursor).toEqual('CAESJXZRb2pvNWdRejhVZ2R3QVp4RE5FRjVhcmp5MUxlZHRxUG80NHcaDAjBm6jXBhCIzLGoAyIMCMGbqNcGEIjMsagDKgwIwZuo1wYQiMyxqAM=');
     expect(entityResp.rows[0].lastRequestId).toEqual('a95aa5bfa73a416');
+    expect(entityResp.rows[0].clientId).toEqual('asdf');
 
     const accessTokenPieces = entityResp.rows[0].accessToken.split(':');
     const accessToken = decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
@@ -136,7 +139,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     }
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
+      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=wqer')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -145,6 +148,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('HISTORICAL_UPDATE_COMPLETE');
     expect(entityResp.rows[0].nextCursor).toEqual('it is a cursor!'); // this changed between first and second
     expect(entityResp.rows[0].lastRequestId).toEqual('a95aa5bfa73a416');
+    expect(entityResp.rows[0].clientId).toEqual('wqer');
 
     const accessTokenPieces = entityResp.rows[0].accessToken.split(':');
     const accessToken = decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
@@ -183,7 +187,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_remove_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
+      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=zxcv')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -195,6 +199,21 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     // Transaction is added and removed in the same cursor/process/call
     const transactionsResp = await pool.query(`SELECT * FROM transaction`);
     expect(transactionsResp.rowCount).toEqual(0);
+  });
+
+  it('gets access token for client', async () => {
+    testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_add_entity_accounts_transactions);
+
+    const encryption = new Encryption(testingConfiguration as Configuration);
+    const { encrypted, iv, tag } = encryption.encrypt('encryptedAccessToken');
+
+    await pool.query(
+      'INSERT INTO entity("providerEntityId", "transactionsUpdateStatus", "nextCursor", "lastRequestId", "accessToken", "clientId") VALUES($1, $2, $3, $4, $5, $6) RETURNING id',
+      ['providerEntityId', TransactionsUpdateStatus.HistoricalUpdateComplete, 'nextCursor', 'lastRequestId', `${encrypted}:${iv}:${tag}`, 'asdf']);
+
+    await request(app.getHttpServer())
+      .get('/getAccessTokenForClientId?clientId=asdf')
+      .expect(200, 'encryptedAccessToken');
   });
 
   let testingConfiguration = {
@@ -209,7 +228,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
 
   let testingPlaidClientApiWrapperService = {
     // Only have to stub this one, because we stubbed all of the PlaidAuthenticationService (which calls the authentication methods on wrapper)
-    transactionsSync: (accessToken: string, cursor: string) => { }
+    transactionsSync: (accessToken: string, cursor: string, clientId: string) => { }
   };
 
   let stubbedAuthenticationService = {

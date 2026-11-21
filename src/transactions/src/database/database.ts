@@ -32,7 +32,7 @@ export class Database implements OnApplicationShutdown {
         )
     }
 
-    addOrUpdateEntity = async (providerEntityId: string, transactionsUpdateStatus: string, nextCursor: string, lastRequestId: string, accessToken: string) => {
+    addOrUpdateEntity = async (providerEntityId: string, transactionsUpdateStatus: string, nextCursor: string, lastRequestId: string, accessToken: string, clientId: string) => {
         const { encrypted, iv, tag } = this.encryption.encrypt(accessToken);
         const encryptedAccessToken = `${encrypted}:${iv}:${tag}`;
 
@@ -48,16 +48,17 @@ export class Database implements OnApplicationShutdown {
                     "nextCursor" = $3,
                     "lastRequestId" = $4,
                     "modifiedAt" = CURRENT_TIMESTAMP,
-                    "accessToken" = $5
+                    "accessToken" = $5,
+                    "clientId" = $6
                 WHERE "providerEntityId" = $1
                 RETURNING id`,
-                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, encryptedAccessToken]
+                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, encryptedAccessToken, clientId]
             );
             return ret.rows[0].id;
         } else {
             const ret = await this.pool.query(
-                'INSERT INTO entity("providerEntityId", "transactionsUpdateStatus", "nextCursor", "lastRequestId", "accessToken") VALUES($1, $2, $3, $4, $5) RETURNING id',
-                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, encryptedAccessToken]);
+                'INSERT INTO entity("providerEntityId", "transactionsUpdateStatus", "nextCursor", "lastRequestId", "accessToken", "clientId") VALUES($1, $2, $3, $4, $5, $6) RETURNING id',
+                [providerEntityId, transactionsUpdateStatus, nextCursor, lastRequestId, encryptedAccessToken, clientId]);
             return ret.rows[0].id;
         }
     };
@@ -200,6 +201,7 @@ export class Database implements OnApplicationShutdown {
                 ]);
         }));
     };
+
     bulkRemoveTransactions = async (transactions: RemovedTransaction[]) => {
         await Promise.all(transactions.map(transaction => {
             this.pool.query(
@@ -207,6 +209,15 @@ export class Database implements OnApplicationShutdown {
                 [transaction.transaction_id, transaction.account_id]);
         }));
     };
+
+    getAccessTokenForClientId = async (clientId: string) => {
+        const result = await this.pool.query('SELECT "accessToken" FROM "entity" WHERE "clientId" = $1', [clientId]);
+        if (result.rowCount === 0)
+            return null;
+
+        const accessTokenPieces = result.rows[0].accessToken.split(':');
+        return this.encryption.decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
+    }
 }
 
 export interface Entity {
