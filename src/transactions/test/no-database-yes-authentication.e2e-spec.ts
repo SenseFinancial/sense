@@ -37,89 +37,66 @@ describe('AppController (e2e) no database, testing authentication', () => {
         await app.close();
     });
 
+    const urls = [
+        '/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId',
+        '/getAccessTokenForClientId?clientId=asdf'
+    ];
+
     it('fails when given no jwt token', async () => {
-        await request(app.getHttpServer())
-            .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
-            .expect(401);
+        await Promise.all(urls.map(async (url) => {
+            await request(app.getHttpServer())
+                .get(url)
+                .expect(401);
+        }));
     });
 
     it('fails when given jwt token with bad issuer', async () => {
-        const badToken = await new jose.SignJWT()
-            .setProtectedHeader({ alg: 'HS256' })
-            .setIssuedAt()
-            .setIssuer('NOT THE ISSUER')
-            .setAudience(goodAudience)
-            .setExpirationTime('15m')
-            .sign(encodedGoodSecret);
-
-        await request(app.getHttpServer())
-            .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
-            .set('Authorization', `Bearer ${badToken}`)
-            .expect(401);
+        await Promise.all(urls.map(async (url) => {
+            await getResult('HS256', 'NOT THE ISSUER', goodAudience, encodedGoodSecret, 401, url);
+        }));
     });
 
     it('fails when given jwt token with bad audience', async () => {
-        const badToken = await new jose.SignJWT()
-            .setProtectedHeader({ alg: 'HS256' })
-            .setIssuedAt()
-            .setIssuer(goodIssuer)
-            .setAudience("NOT AUDIENCE")
-            .setExpirationTime('15m')
-            .sign(encodedGoodSecret);
-
-        await request(app.getHttpServer())
-            .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
-            .set('Authorization', `Bearer ${badToken}`)
-            .expect(401);
+        await Promise.all(urls.map(async (url) => {
+            await getResult('HS256', goodIssuer, "NOT AUDIENCE", encodedGoodSecret, 401, url);
+        }));
     });
 
     it('fails when given jwt token with bad secret', async () => {
         const badSecret = new TextEncoder().encode(
             "BAD secret"
         );
-        const badToken = await new jose.SignJWT()
-            .setProtectedHeader({ alg: 'HS256' })
-            .setIssuedAt()
-            .setIssuer(goodIssuer)
-            .setAudience(goodAudience)
-            .setExpirationTime('15m')
-            .sign(badSecret);
-
-        await request(app.getHttpServer())
-            .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
-            .set('Authorization', `Bearer ${badToken}`)
-            .expect(401);
+        await Promise.all(urls.map(async (url) => {
+            await getResult('HS256', goodIssuer, goodAudience, badSecret, 401, url);
+        }));
     });
 
     it('fails when given jwt token with bad algorithm', async () => {
-        const badToken = await new jose.SignJWT()
-            .setProtectedHeader({ alg: 'HS384' })
-            .setIssuedAt()
-            .setIssuer(goodIssuer)
-            .setAudience(goodAudience)
-            .setExpirationTime('15m')
-            .sign(encodedGoodSecret);
-
-        await request(app.getHttpServer())
-            .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
-            .set('Authorization', `Bearer ${badToken}`)
-            .expect(401);
+        await Promise.all(urls.map(async (url) => {
+            await getResult('HS384', goodIssuer, goodAudience, encodedGoodSecret, 401, url);
+        }));
     });
 
     it('succeeds when given jwt token with everything right', async () => {
-        const goodToken = await new jose.SignJWT()
-            .setProtectedHeader({ alg: 'HS256' })
-            .setIssuedAt()
-            .setIssuer(goodIssuer)
-            .setAudience(goodAudience)
-            .setExpirationTime('15m')
-            .sign(encodedGoodSecret);
-
-        await request(app.getHttpServer())
-            .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId')
-            .set('Authorization', `Bearer ${goodToken}`)
-            .expect(200);
+        await Promise.all(urls.map(async (url) => {
+            await getResult('HS256', goodIssuer, goodAudience, encodedGoodSecret, 200, url);
+        }));
     });
+
+    async function getResult(algorithm: string, issuer: string, audience: string, secret: Uint8Array<ArrayBuffer>, expect: number, url: string) {
+        const token = await new jose.SignJWT()
+            .setProtectedHeader({ alg: algorithm })
+            .setIssuedAt()
+            .setIssuer(issuer)
+            .setAudience(audience)
+            .setExpirationTime('15m')
+            .sign(secret);
+
+        return await request(app.getHttpServer())
+            .get(url)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(expect);
+    }
 
     let testingConfiguration = {
         getDatabaseUrl: () => { },
@@ -130,7 +107,8 @@ describe('AppController (e2e) no database, testing authentication', () => {
     };
 
     let testingPlaidTransactionsService = {
-        transactionsSync: () => Promise.resolve(TransactionsUpdateStatus.HistoricalUpdateComplete)
+        transactionsSync: () => Promise.resolve(TransactionsUpdateStatus.HistoricalUpdateComplete),
+        getAccessTokenForClientId: () => Promise.resolve('asdf')
     };
 
     let testingPlaidClientApiWrapperService = {
