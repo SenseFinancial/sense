@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from 'plaid';
 import axios from 'axios';
 import { returnNullIfAuthorized } from '@/app/auth/utils';
+import { generateTransactionsJwt } from '@/app/auth/jwt';
 
 const config = new Configuration({
     basePath: PlaidEnvironments[process.env.PLAID_ENV as keyof typeof PlaidEnvironments],
@@ -21,6 +22,17 @@ export async function POST(req: NextRequest) {
 
     try {
         const { client_user_id } = await req.json();
+        const jwt = await generateTransactionsJwt();
+
+        const accessTokenResponse = await axios.get(
+            `${process.env.TRANSACTIONS_ADDRESS}/getAccessTokenForClientId?clientId=${client_user_id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${jwt}`
+                }
+            }
+        );
+
         const response = await client.linkTokenCreate({
             user: { client_user_id },
             client_name: 'Sense',
@@ -29,6 +41,7 @@ export async function POST(req: NextRequest) {
             ],
             country_codes: [CountryCode.Ca],
             language: 'en',
+            access_token: accessTokenResponse.data || undefined
         });
         return NextResponse.json({ link_token: response.data.link_token });
     } catch (error) {

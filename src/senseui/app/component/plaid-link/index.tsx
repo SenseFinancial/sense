@@ -27,7 +27,8 @@ export default function PlaidLink({ onSuccess }: { onSuccess: () => void }) {
 
             await axios.post('/api/transactions/transactionsSync', {
                 accessToken: response.data.access_token,
-                itemId: response.data.item_id
+                itemId: response.data.item_id,
+                clientId: 'your-unique-user-id'
             });
 
             onSuccess();

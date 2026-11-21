@@ -9,10 +9,10 @@ export async function POST(req: NextRequest) {
     if (auth) return auth;
 
     try {
-        const { accessToken, itemId } = await req.json();
+        const { accessToken, itemId, clientId } = await req.json();
         const jwt = await generateTransactionsJwt();
         const response = await axios.get(
-            `${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?accessToken=${accessToken}&itemId=${itemId}`,
+            `${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?accessToken=${accessToken}&itemId=${itemId}&clientId=${clientId}`,
             {
                 headers: {
                     Authorization: `Bearer ${jwt}`
