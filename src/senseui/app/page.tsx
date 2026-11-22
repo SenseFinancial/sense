@@ -6,8 +6,15 @@ import CheckSignIn from './component/check-sign-in';
 
 export default function Home() {
   const [isToastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
-  function onPlaidLinkSuccess() {
+  function handlePlaidLinkSuccess() {
+    setToastMessage("You have successfully linked your account. If this was the real product, there would be more here, but it isn't. Thanks for participating in our prototype!");
+    setToastOpen(true);
+  }
+
+  function handleHasPreviousAccessToken() {
+    setToastMessage('You have previously connected your bank account and during this prototype you cannot connect another!');
     setToastOpen(true);
   }
 
@@ -64,8 +71,8 @@ export default function Home() {
         <div className="text-xs mb-2">
           By clicking "Connect Bank" you give consent for Sense to collect, process and store your consumer data.
         </div>
-        <PlaidLink onSuccess={onPlaidLinkSuccess} />
-        <Toast isOpen={isToastOpen} onRequestClose={() => setToastOpen(false)} message="You have successfully linked your account. If this was the real product, there would be more here, but it isn't. Thanks for participating in our prototype!" />
+        <PlaidLink onSuccess={handlePlaidLinkSuccess} onHasPreviousAccessToken={handleHasPreviousAccessToken} />
+        <Toast isOpen={isToastOpen} onRequestClose={() => setToastOpen(false)} message={toastMessage} />
       </div>
     </CheckSignIn>
   );

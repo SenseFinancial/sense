@@ -4,7 +4,7 @@ import { usePlaidLink } from 'react-plaid-link';
 import axios from 'axios';
 import Button from '@/app/component/button';
 
-export default function PlaidLink({ onSuccess }: { onSuccess: () => void }) {
+export default function PlaidLink({ onSuccess, onHasPreviousAccessToken }: { onSuccess: () => void, onHasPreviousAccessToken: () => void }) {
     const [linkToken, setLinkToken] = useState<string | null>(null);
     useEffect(() => {
         const createLinkToken = async () => {
@@ -12,7 +12,11 @@ export default function PlaidLink({ onSuccess }: { onSuccess: () => void }) {
                 const response = await axios.post('/api/plaid/create-link-token', {
                     client_user_id: 'your-unique-user-id', // Replace with actual user ID
                 });
-                setLinkToken(response.data.link_token);
+
+                if (response.data.hasAccessToken)
+                    onHasPreviousAccessToken();
+                else
+                    setLinkToken(response.data.link_token);
             } catch (error) {
                 console.error('Error generating link token:', error);
             }
