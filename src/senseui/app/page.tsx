@@ -3,12 +3,28 @@ import { useState } from 'react';
 import PlaidLink from "./component/plaid-link";
 import Toast from "./component/toast";
 import CheckSignIn from './component/check-sign-in';
+import Button from './component/button';
 
 export default function Home() {
   const [isToastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [clientId, setClientId] = useState('your-unique-user-id');
+  const [tempClientId, setTempClientId] = useState(clientId);
 
-  function onPlaidLinkSuccess() {
+  function handlePlaidLinkSuccess() {
+    setToastMessage("You have successfully linked your account. If this was the real product, there would be more here, but it isn't. Thanks for participating in our prototype!");
     setToastOpen(true);
+  }
+
+  function handleHasPreviousAccessToken() {
+    setToastMessage('You have previously connected your bank account and during this prototype you cannot connect another!');
+    setToastOpen(true);
+  }
+
+  function handleRefreshClientID() {
+    setToastOpen(false);
+    setToastMessage('');
+    setClientId(tempClientId);
   }
 
   return (
@@ -61,11 +77,22 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <div className="mb-2">
+          Enter a client ID to change users:
+          <input
+            type="text"
+            placeholder="Enter client ID"
+            value={tempClientId}
+            onChange={(e) => setTempClientId(e.target.value)}
+            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ml-2 mr-2"
+          />
+          <Button onClick={handleRefreshClientID}>Set Client ID</Button>
+        </div>
         <div className="text-xs mb-2">
           By clicking "Connect Bank" you give consent for Sense to collect, process and store your consumer data.
         </div>
-        <PlaidLink onSuccess={onPlaidLinkSuccess} />
-        <Toast isOpen={isToastOpen} onRequestClose={() => setToastOpen(false)} message="You have successfully linked your account. If this was the real product, there would be more here, but it isn't. Thanks for participating in our prototype!" />
+        <PlaidLink clientId={clientId} onSuccess={handlePlaidLinkSuccess} onHasPreviousAccessToken={handleHasPreviousAccessToken} />
+        <Toast isOpen={isToastOpen} onRequestClose={() => setToastOpen(false)} message={toastMessage} />
       </div>
     </CheckSignIn>
   );

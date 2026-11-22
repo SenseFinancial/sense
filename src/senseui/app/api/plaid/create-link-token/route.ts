@@ -33,6 +33,10 @@ export async function POST(req: NextRequest) {
             }
         );
 
+        // At another time we will want to allow connecting another bank account so this line may need to change
+        if (accessTokenResponse.data)
+            return NextResponse.json({ link_token: null, hasAccessToken: true });
+
         const response = await client.linkTokenCreate({
             user: { client_user_id },
             client_name: 'Sense',
@@ -40,8 +44,7 @@ export async function POST(req: NextRequest) {
                 Products.Transactions,
             ],
             country_codes: [CountryCode.Ca],
-            language: 'en',
-            access_token: accessTokenResponse.data || undefined
+            language: 'en'
         });
         return NextResponse.json({ link_token: response.data.link_token });
     } catch (error) {
