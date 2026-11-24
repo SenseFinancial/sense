@@ -22,7 +22,7 @@ export class Database implements OnApplicationShutdown {
             'SELECT "nextCursor" FROM public.entity WHERE "providerEntityId" = $1',
             [providerEntityId]);
         if (res.rowCount === 0) return null;
-        return res.rows[0];
+        return res.rows[0].nextCursor;
     };
 
     setNextCursorForProviderEntityId = async (providerEntityId: string, nextCursor: string) => {

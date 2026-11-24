@@ -4,17 +4,19 @@ import { Authentication } from './infrastructure/authentication';
 import { JOSEError } from 'jose/errors';
 import { PlaidError } from 'plaid';
 import AddEntityDto from './dto/AddEntityDto';
+import { Logger } from './infrastructure/logger';
 
 @Controller()
 export class AppController {
-  constructor(private readonly transactionsService: PlaidTransactionsService, private readonly authentication: Authentication) { }
+  constructor(private readonly transactionsService: PlaidTransactionsService, private readonly authentication: Authentication, private readonly logger: Logger) { }
 
   @Get('beginTransactionsSync')
-  async beginTransactionsSync(@Headers('authorization') token: string, @Query('accessToken') accessToken: string, @Query('itemId') itemId: string, @Query('clientId') clientId: string) {
+  async beginTransactionsSync(@Headers('authorization') token: string, @Query('providerEntityId') providerEntityId: string, @Query('clientId') clientId: string) {
     try {
+      this.logger.info(`Starting method beginTransactionsSync for providerEntityId ${providerEntityId}.`)
       await this.authentication.verifyJwt(token);
 
-      const status = await this.transactionsService.transactionsSync(accessToken, itemId, clientId);
+      const status = await this.transactionsService.transactionsSync(providerEntityId, clientId);
       return {
         transactionsUpdateStatus: status
       };
@@ -37,12 +39,15 @@ export class AppController {
       }
 
       throw new InternalServerErrorException('Failed to sync transactions.');
+    } finally {
+      this.logger.info(`Ending method beginTransactionsSync for providerEntityId ${providerEntityId} and clientId ${clientId}.`);
     }
   }
 
   @Get('getAccessTokenForClientId')
   async getAccessTokenForClientId(@Headers('authorization') token: string, @Query('clientId') clientId: string) {
     try {
+      this.logger.info(`Starting method getAccessTokenForClientId for clientId ${clientId}.`);
       await this.authentication.verifyJwt(token);
 
       return await this.transactionsService.getAccessTokenForClientId(clientId);
@@ -53,12 +58,15 @@ export class AppController {
       }
       console.log(error);
       throw new InternalServerErrorException('Failed to get client ID.');
+    } finally {
+      this.logger.info(`Ending method getAccessTokenForClientId for clientId ${clientId}.`);
     }
   }
 
   @Post('addEntity')
   async addEntity(@Headers('authorization') token: string, @Body() addEntityDto: AddEntityDto) {
     try {
+      this.logger.info(`Starting method addEntity for clientId ${addEntityDto.clientId}.`);
       await this.authentication.verifyJwt(token);
 
       await this.transactionsService.addEntity(addEntityDto.clientId, addEntityDto.accessToken, addEntityDto.providerEntityId);
@@ -69,6 +77,8 @@ export class AppController {
       }
       console.log(error);
       throw new InternalServerErrorException('Failed to add entity.');
+    } finally {
+      this.logger.info(`Ending method addEntity for clientId ${addEntityDto.clientId}.`);
     }
   }
 }

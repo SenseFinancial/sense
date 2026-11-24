@@ -58,6 +58,7 @@ describe('AppController (e2e) no database, testing authentication', () => {
             } else {
                 await request(app.getHttpServer())
                     .post(url.url)
+                    .send({})
                     .expect(401);
             }
         }));

@@ -70,7 +70,12 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_add_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=asdf')
+      .post('/addEntity')
+      .send({ accessToken: 'sandBoxAccessToken', providerEntityId: 'sandBoxItemId', clientId: 'asdf' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/beginTransactionsSync?providerEntityId=sandBoxItemId&clientId=asdf')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -139,7 +144,12 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     }
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=wqer')
+      .post('/addEntity')
+      .send({ accessToken: 'sandBoxAccessToken', providerEntityId: 'sandBoxItemId', clientId: 'wqer' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/beginTransactionsSync?providerEntityId=sandBoxItemId&clientId=wqer')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -187,7 +197,12 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_remove_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=zxcv')
+      .post('/addEntity')
+      .send({ accessToken: 'sandBoxAccessToken', providerEntityId: 'sandBoxItemId', clientId: 'zxcv' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/beginTransactionsSync?&providerEntityId=sandBoxItemId&clientId=zxcv')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
