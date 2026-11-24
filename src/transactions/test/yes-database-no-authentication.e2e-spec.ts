@@ -75,7 +75,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?providerEntityId=sandBoxItemId&clientId=asdf')
+      .get('/beginTransactionsSync?clientId=asdf')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -149,7 +149,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?providerEntityId=sandBoxItemId&clientId=wqer')
+      .get('/beginTransactionsSync?clientId=wqer')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -202,7 +202,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?&providerEntityId=sandBoxItemId&clientId=zxcv')
+      .get('/beginTransactionsSync?&clientId=zxcv')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);

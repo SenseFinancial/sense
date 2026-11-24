@@ -218,6 +218,14 @@ export class Database implements OnApplicationShutdown {
         const accessTokenPieces = result.rows[0].accessToken.split(':');
         return this.encryption.decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
     }
+
+    getProviderEntityIdForClientId = async (clientId: string) => {
+        const result = await this.pool.query('SELECT "providerEntityId" FROM "entity" WHERE "clientId" = $1', [clientId]);
+        if (result.rowCount === 0)
+            return null;
+
+        return result.rows[0].providerEntityId;
+    }
 }
 
 export interface Entity {
