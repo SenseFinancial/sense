@@ -14,11 +14,15 @@ export class PlaidTransactionsService {
     ) {
     }
 
-    transactionsSync = async (accessToken: string, itemId: string, clientId: string) => {
-        this.logger.info(`Starting method transactionsSync for itemId ${itemId}.`)
+    transactionsSync = async (itemId: string, clientId: string) => {
         let cursor = await this.database.getLatestCursorOrNullForProviderEntityId(itemId);
         let hasMore = true;
         let transactionsUpdateStatus = '';
+
+        const accessToken = await this.database.getAccessTokenForClientId(clientId);
+        if (!accessToken) {
+            throw new Error('beginTransactionsSync must be called after creating an initial entity including an access token.');
+        }
 
         while (hasMore) {
             this.logger.info(`Starting Plaid API call transactionsSync with cursor '${cursor}'.`);
@@ -37,8 +41,6 @@ export class PlaidTransactionsService {
             transactionsUpdateStatus = data.transactions_update_status;
         }
 
-        this.logger.info(`Ending method transactionSync for itemId ${itemId}.`);
-
         // This seems silly, but we want to return *our* status messages to the caller and not Plaid ones.
         switch (transactionsUpdateStatus) {
             case PlaidTransactionsUpdateStatus.NotReady:
@@ -53,9 +55,10 @@ export class PlaidTransactionsService {
     }
 
     getAccessTokenForClientId = async (clientId: string) => {
-        this.logger.info(`Starting method getAccessTokenForClientId for clientId ${clientId}.`);
-        const result = await this.database.getAccessTokenForClientId(clientId);
-        this.logger.info(`Ending method getAccessTokenForClientId for clientId ${clientId}.`);
-        return result;
+        return await this.database.getAccessTokenForClientId(clientId);
+    };
+
+    addEntity = async (clientId: string, accessToken: string, providerEntityId: string) => {
+        await this.database.addOrUpdateEntity(providerEntityId, 'NO_UPDATE_REQUESTED', null, null, accessToken, clientId);
     };
 }

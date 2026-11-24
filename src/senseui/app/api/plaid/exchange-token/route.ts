@@ -2,6 +2,7 @@ import { returnNullIfAuthorized } from '@/app/auth/utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid';
 import axios from 'axios';
+import { generateTransactionsJwt } from '@/app/auth/jwt';
 
 const config = new Configuration({
     basePath: PlaidEnvironments[process.env.PLAID_ENV as keyof typeof PlaidEnvironments],
@@ -20,10 +21,26 @@ export async function POST(req: NextRequest) {
     if (auth) return auth;
 
     try {
-        const { public_token } = await req.json();
-        const response = await client.itemPublicTokenExchange({ public_token });
+        const { publicToken, clientId } = await req.json();
+        const response = await client.itemPublicTokenExchange({ public_token: publicToken });
         const { access_token, item_id } = response.data;
-        return NextResponse.json({ access_token, item_id });
+
+        const jwt = await generateTransactionsJwt();
+        await axios.post(
+            `${process.env.TRANSACTIONS_ADDRESS}/addEntity`,
+            {
+                providerEntityId: item_id,
+                clientId: clientId,
+                accessToken: access_token
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${jwt}`
+                }
+            }
+        );
+
+        return NextResponse.json({ item_id });
     } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.response)

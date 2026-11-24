@@ -22,7 +22,7 @@ export class Database implements OnApplicationShutdown {
             'SELECT "nextCursor" FROM public.entity WHERE "providerEntityId" = $1',
             [providerEntityId]);
         if (res.rowCount === 0) return null;
-        return res.rows[0];
+        return res.rows[0].nextCursor;
     };
 
     setNextCursorForProviderEntityId = async (providerEntityId: string, nextCursor: string) => {
@@ -32,7 +32,7 @@ export class Database implements OnApplicationShutdown {
         )
     }
 
-    addOrUpdateEntity = async (providerEntityId: string, transactionsUpdateStatus: string, nextCursor: string, lastRequestId: string, accessToken: string, clientId: string) => {
+    addOrUpdateEntity = async (providerEntityId: string, transactionsUpdateStatus: string, nextCursor: string | null, lastRequestId: string | null, accessToken: string, clientId: string) => {
         const { encrypted, iv, tag } = this.encryption.encrypt(accessToken);
         const encryptedAccessToken = `${encrypted}:${iv}:${tag}`;
 

@@ -21,11 +21,11 @@ export async function POST(req: NextRequest) {
     if (auth) return auth;
 
     try {
-        const { client_user_id } = await req.json();
+        const { clientId } = await req.json();
         const jwt = await generateTransactionsJwt();
 
         const accessTokenResponse = await axios.get(
-            `${process.env.TRANSACTIONS_ADDRESS}/getAccessTokenForClientId?clientId=${client_user_id}`,
+            `${process.env.TRANSACTIONS_ADDRESS}/getAccessTokenForClientId?clientId=${clientId}`,
             {
                 headers: {
                     Authorization: `Bearer ${jwt}`
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ link_token: null, hasAccessToken: true });
 
         const response = await client.linkTokenCreate({
-            user: { client_user_id },
+            user: { client_user_id: clientId },
             client_name: 'Sense',
             products: [
                 Products.Transactions,

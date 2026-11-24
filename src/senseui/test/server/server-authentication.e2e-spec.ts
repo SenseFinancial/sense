@@ -116,7 +116,7 @@ describe('Test Next.js server authentication', () => {
             mockedItemPublicTokenExchange.mockResolvedValue({ data: {} });
 
             await Promise.all(routes.map(async (route) => {
-                const response = await requestRoute(route, testHeaders, { accessToken: 'access token', itemId: 'item id' });
+                const response = await requestRoute(route, testHeaders, { itemId: 'item id' });
                 expect(response.status).toBe(200);
             }));
         } catch (err) {

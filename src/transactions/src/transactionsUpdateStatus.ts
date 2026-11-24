@@ -2,7 +2,8 @@ enum TransactionsUpdateStatus {
     Unknown,
     NotReady,
     InitialUpdateComplete,
-    HistoricalUpdateComplete
+    HistoricalUpdateComplete,
+    NoUpdateRequested
 }
 
 export default TransactionsUpdateStatus;

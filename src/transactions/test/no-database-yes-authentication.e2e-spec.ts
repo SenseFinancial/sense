@@ -9,6 +9,12 @@ import { Configuration } from '../src/infrastructure/configuration';
 import { PlaidTransactionsService } from '../src/plaid/plaidTransactionsService';
 import TransactionsUpdateStatus from '../src/transactionsUpdateStatus';
 
+class UrlData {
+    url: string;
+    type: string;
+    expect: number;
+}
+
 describe('AppController (e2e) no database, testing authentication', () => {
     let app: INestApplication<App>;
 
@@ -38,15 +44,23 @@ describe('AppController (e2e) no database, testing authentication', () => {
     });
 
     const urls = [
-        '/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId',
-        '/getAccessTokenForClientId?clientId=asdf'
+        { url: '/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId', type: 'get', expect: 200 },
+        { url: '/getAccessTokenForClientId?clientId=asdf', type: 'get', expect: 200 },
+        { url: '/addEntity', type: 'post', expect: 201 }
     ];
 
     it('fails when given no jwt token', async () => {
         await Promise.all(urls.map(async (url) => {
-            await request(app.getHttpServer())
-                .get(url)
-                .expect(401);
+            if (url.type === 'get') {
+                await request(app.getHttpServer())
+                    .get(url.url)
+                    .expect(401);
+            } else {
+                await request(app.getHttpServer())
+                    .post(url.url)
+                    .send({})
+                    .expect(401);
+            }
         }));
     });
 
@@ -79,11 +93,11 @@ describe('AppController (e2e) no database, testing authentication', () => {
 
     it('succeeds when given jwt token with everything right', async () => {
         await Promise.all(urls.map(async (url) => {
-            await getResult('HS256', goodIssuer, goodAudience, encodedGoodSecret, 200, url);
+            await getResult('HS256', goodIssuer, goodAudience, encodedGoodSecret, url.expect, url);
         }));
     });
 
-    async function getResult(algorithm: string, issuer: string, audience: string, secret: Uint8Array<ArrayBuffer>, expect: number, url: string) {
+    async function getResult(algorithm: string, issuer: string, audience: string, secret: Uint8Array<ArrayBuffer>, expect: number, urlData: UrlData) {
         const token = await new jose.SignJWT()
             .setProtectedHeader({ alg: algorithm })
             .setIssuedAt()
@@ -92,10 +106,18 @@ describe('AppController (e2e) no database, testing authentication', () => {
             .setExpirationTime('15m')
             .sign(secret);
 
-        return await request(app.getHttpServer())
-            .get(url)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(expect);
+        if (urlData.type === 'get') {
+            return await request(app.getHttpServer())
+                .get(urlData.url)
+                .set('Authorization', `Bearer ${token}`)
+                .expect(expect);
+        } else {
+            return await request(app.getHttpServer())
+                .post(urlData.url)
+                .set('Authorization', `Bearer ${token}`)
+                .send({})
+                .expect(expect);
+        }
     }
 
     let testingConfiguration = {
@@ -108,7 +130,8 @@ describe('AppController (e2e) no database, testing authentication', () => {
 
     let testingPlaidTransactionsService = {
         transactionsSync: () => Promise.resolve(TransactionsUpdateStatus.HistoricalUpdateComplete),
-        getAccessTokenForClientId: () => Promise.resolve('asdf')
+        getAccessTokenForClientId: () => Promise.resolve('asdf'),
+        addEntity: () => Promise.resolve('')
     };
 
     let testingPlaidClientApiWrapperService = {

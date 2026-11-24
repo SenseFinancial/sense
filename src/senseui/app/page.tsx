@@ -89,7 +89,7 @@ export default function Home() {
           <Button onClick={handleRefreshClientID}>Set Client ID</Button>
         </div>
         <div className="text-xs mb-2">
-          By clicking "Connect Bank" you give consent for Sense to collect, process and store your consumer data.
+          By clicking "Connect Bank" or "Update Account" you give consent for Sense to collect, process and store your consumer data.
         </div>
         <PlaidLink clientId={clientId} onSuccess={handlePlaidLinkSuccess} onNonSuccess={handlePlaidLinkNonSuccess} />
         <Toast isOpen={isToastOpen} onRequestClose={() => setToastOpen(false)} message={toastMessage} />

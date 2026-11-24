@@ -70,7 +70,12 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_add_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=asdf')
+      .post('/addEntity')
+      .send({ accessToken: 'sandBoxAccessToken', providerEntityId: 'sandBoxItemId', clientId: 'asdf' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/beginTransactionsSync?providerEntityId=sandBoxItemId&clientId=asdf')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -139,7 +144,12 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     }
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=wqer')
+      .post('/addEntity')
+      .send({ accessToken: 'sandBoxAccessToken', providerEntityId: 'sandBoxItemId', clientId: 'wqer' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/beginTransactionsSync?providerEntityId=sandBoxItemId&clientId=wqer')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -187,7 +197,12 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     testingPlaidClientApiWrapperService.transactionsSync = () => Promise.resolve(data_remove_entity_accounts_transactions);
 
     await request(app.getHttpServer())
-      .get('/beginTransactionsSync?accessToken=sandBoxAccessToken&itemId=sandBoxItemId&clientId=zxcv')
+      .post('/addEntity')
+      .send({ accessToken: 'sandBoxAccessToken', providerEntityId: 'sandBoxItemId', clientId: 'zxcv' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/beginTransactionsSync?&providerEntityId=sandBoxItemId&clientId=zxcv')
       .expect(200);
 
     const entityResp = await pool.query(`SELECT * FROM entity where "providerEntityId" = 'sandBoxItemId'`);
@@ -214,6 +229,25 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     await request(app.getHttpServer())
       .get('/getAccessTokenForClientId?clientId=asdf')
       .expect(200, 'encryptedAccessToken');
+  });
+
+  it('adds entity', async () => {
+    await request(app.getHttpServer())
+      .post('/addEntity')
+      .send({ providerEntityId: 'providerEntityIdy', clientId: 'clientIdy', accessToken: 'accessTokeny' })
+      .expect(201);
+
+    const entityResp = await pool.query('SELECT * FROM "entity"');
+    expect(entityResp.rowCount).toEqual(1);
+    expect(entityResp.rows[0].providerEntityId).toEqual('providerEntityIdy');
+    expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('NO_UPDATE_REQUESTED');
+    expect(entityResp.rows[0].nextCursor).toEqual(null);
+    expect(entityResp.rows[0].lastRequestId).toEqual(null);
+    expect(entityResp.rows[0].clientId).toEqual('clientIdy');
+
+    const accessTokenPieces = entityResp.rows[0].accessToken.split(':');
+    const accessToken = decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
+    expect(accessToken).toEqual('accessTokeny');
   });
 
   let testingConfiguration = {

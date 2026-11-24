@@ -9,22 +9,25 @@ import TransactionsUpdateStatus from '@/app/api/transactions/transactionsUpdateS
 export default function PlaidLink({ onSuccess, onNonSuccess, clientId }: { onSuccess: () => void, onNonSuccess: (message: string) => void, clientId: string }) {
     const [linkToken, setLinkToken] = useState<string | null>(null);
     const [showConnectButton, setShowConnectButton] = useState(true);
+    const [showUpdateButton, setShowUpdateButton] = useState(false);
     const isExchanging = useRef(false);
 
     useEffect(() => {
         const createLinkToken = async () => {
             try {
-                const response = await axios.post('/api/plaid/create-link-token', {
-                    client_user_id: clientId
-                });
+                const response = await axios.post('/api/plaid/create-link-token', { clientId });
 
-                if (response.data.hasAccessToken)
+                if (response.data.hasAccessToken) {
+                    setShowUpdateButton(true);
                     onNonSuccess('You have previously connected your bank account and during this prototype you cannot connect another!');
-                else if (response.data.error) {
+                } else if (response.data.error) {
+                    setShowConnectButton(false);
+                    setShowUpdateButton(false);
                     onNonSuccess('There was an error generating a link token to use Plaid.');
                 } else {
                     setLinkToken(response.data.link_token);
                     setShowConnectButton(true);
+                    setShowUpdateButton(false);
                 }
             } catch (error) {
                 onNonSuccess('There was an error generating a link token to use Plaid.');
@@ -33,20 +36,20 @@ export default function PlaidLink({ onSuccess, onNonSuccess, clientId }: { onSuc
         createLinkToken();
     }, [clientId]);
 
-    const onCreateLinkTokenSuccess = async (public_token: string | null) => {
+    const onCreateLinkTokenSuccess = async (publicToken: string | null) => {
         try {
-            if (!public_token || isExchanging.current) return;
+            if (!publicToken || isExchanging.current) return;
             isExchanging.current = true;
 
             const response = await axios.post('/api/plaid/exchange-token', {
-                public_token,
+                publicToken,
+                clientId
             });
 
             if (response.data.error) {
                 onNonSuccess('There was an error getting an access token to use Plaid.');
             } else {
                 const { data: { transactionsUpdateStatus } } = await axios.post('/api/transactions/transactionsSync', {
-                    accessToken: response.data.access_token,
                     itemId: response.data.item_id,
                     clientId: clientId
                 });
@@ -61,7 +64,6 @@ export default function PlaidLink({ onSuccess, onNonSuccess, clientId }: { onSuc
                         onNonSuccess("Plaid has collected some of your data but hasn't been able to collect the full historical set. Try again in 2-3 minutes.");
                         break;
                     case TransactionsUpdateStatus.HistoricalUpdateComplete:
-                        // Transactions service has all the data
                         onSuccess();
                         break;
                     case TransactionsUpdateStatus.Unknown:
@@ -101,6 +103,9 @@ export default function PlaidLink({ onSuccess, onNonSuccess, clientId }: { onSuc
         <div>
             {linkToken && showConnectButton && (
                 <Button onClick={open} disabled={!ready}>Connect Bank</Button>
+            )}
+            {showUpdateButton && (
+                <Button onClick={() => { }} disabled={!ready}>Update Account</Button>
             )}
         </div>
     );
