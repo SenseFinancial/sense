@@ -16,8 +16,8 @@ export default function Home() {
     setToastOpen(true);
   }
 
-  function handleHasPreviousAccessToken() {
-    setToastMessage('You have previously connected your bank account and during this prototype you cannot connect another!');
+  function handlePlaidLinkNonSuccess(message: string) {
+    setToastMessage(message);
     setToastOpen(true);
   }
 
@@ -91,7 +91,7 @@ export default function Home() {
         <div className="text-xs mb-2">
           By clicking "Connect Bank" you give consent for Sense to collect, process and store your consumer data.
         </div>
-        <PlaidLink clientId={clientId} onSuccess={handlePlaidLinkSuccess} onHasPreviousAccessToken={handleHasPreviousAccessToken} />
+        <PlaidLink clientId={clientId} onSuccess={handlePlaidLinkSuccess} onNonSuccess={handlePlaidLinkNonSuccess} />
         <Toast isOpen={isToastOpen} onRequestClose={() => setToastOpen(false)} message={toastMessage} />
       </div>
     </CheckSignIn>

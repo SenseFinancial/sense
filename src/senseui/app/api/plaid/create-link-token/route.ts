@@ -56,6 +56,6 @@ export async function POST(req: NextRequest) {
         } else {
             console.log(error);
         }
-        return NextResponse.json({ error: 'Error generating link token' }, { status: 500 });
+        return NextResponse.json({ error: 'Error generating link token.' }, { status: 500 });
     }
 }
