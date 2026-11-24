@@ -11,15 +11,12 @@ export class AppController {
   constructor(private readonly transactionsService: PlaidTransactionsService, private readonly authentication: Authentication, private readonly logger: Logger) { }
 
   @Get('beginTransactionsSync')
-  async beginTransactionsSync(@Headers('authorization') token: string, @Query('providerEntityId') providerEntityId: string, @Query('clientId') clientId: string) {
+  async beginTransactionsSync(@Headers('authorization') token: string, @Query('clientId') clientId: string) {
     try {
-      this.logger.info(`Starting method beginTransactionsSync for providerEntityId ${providerEntityId}.`)
+      this.logger.info(`Starting method beginTransactionsSync for clientId ${clientId}.`)
       await this.authentication.verifyJwt(token);
 
-      const status = await this.transactionsService.transactionsSync(providerEntityId, clientId);
-      return {
-        transactionsUpdateStatus: status
-      };
+      return await this.transactionsService.transactionsSync(clientId);
     } catch (error: any) {
       console.log(error);
       if (error instanceof JOSEError) {
@@ -40,7 +37,7 @@ export class AppController {
 
       throw new InternalServerErrorException('Failed to sync transactions.');
     } finally {
-      this.logger.info(`Ending method beginTransactionsSync for providerEntityId ${providerEntityId} and clientId ${clientId}.`);
+      this.logger.info(`Ending method beginTransactionsSync for clientId ${clientId}.`);
     }
   }
 

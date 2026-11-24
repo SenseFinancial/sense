@@ -14,15 +14,20 @@ export class PlaidTransactionsService {
     ) {
     }
 
-    transactionsSync = async (itemId: string, clientId: string) => {
-        let cursor = await this.database.getLatestCursorOrNullForProviderEntityId(itemId);
-        let hasMore = true;
-        let transactionsUpdateStatus = '';
-
+    transactionsSync = async (clientId: string) => {
         const accessToken = await this.database.getAccessTokenForClientId(clientId);
         if (!accessToken) {
             throw new Error('beginTransactionsSync must be called after creating an initial entity including an access token.');
         }
+
+        const itemId = await this.database.getProviderEntityIdForClientId(clientId);
+        let cursor = await this.database.getLatestCursorOrNullForProviderEntityId(itemId);
+        let hasMore = true;
+        let transactionsUpdateStatus = '';
+        let accountCount = 0;
+        let addedCount = 0;
+        let updateCount = 0;
+        let removeCount = 0;
 
         while (hasMore) {
             this.logger.info(`Starting Plaid API call transactionsSync with cursor '${cursor}'.`);
@@ -39,10 +44,26 @@ export class PlaidTransactionsService {
             hasMore = data.has_more;
             cursor = data.next_cursor;
             transactionsUpdateStatus = data.transactions_update_status;
+            accountCount += data.accounts.length;
+            addedCount += data.added.length;
+            updateCount += data.modified.length;
+            removeCount += data.removed.length;
         }
 
+        return {
+            transactionsUpdateStatus: this.getTransactionsUpdateStatus(transactionsUpdateStatus),
+            metadata: {
+                accountCount,
+                addedCount,
+                updateCount,
+                removeCount
+            }
+        };
+    }
+
+    private getTransactionsUpdateStatus = (plaidStatus: string) => {
         // This seems silly, but we want to return *our* status messages to the caller and not Plaid ones.
-        switch (transactionsUpdateStatus) {
+        switch (plaidStatus) {
             case PlaidTransactionsUpdateStatus.NotReady:
                 return TransactionsUpdateStatus.NotReady;
             case PlaidTransactionsUpdateStatus.InitialUpdateComplete:

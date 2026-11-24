@@ -8,10 +8,10 @@ export async function POST(req: NextRequest) {
     if (auth) return auth;
 
     try {
-        const { itemId, clientId } = await req.json();
+        const { clientId } = await req.json();
         const jwt = await generateTransactionsJwt();
-        const { data: { transactionsUpdateStatus } } = await axios.get(
-            `${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?providerEntityId=${itemId}&clientId=${clientId}`,
+        const { data } = await axios.get(
+            `${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?clientId=${clientId}`,
             {
                 headers: {
                     Authorization: `Bearer ${jwt}`
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
             }
         );
 
-        return NextResponse.json({ transactionsUpdateStatus }, { status: 200 });
+        return NextResponse.json({ ...data }, { status: 200 });
     } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.response)

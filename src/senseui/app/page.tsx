@@ -11,8 +11,8 @@ export default function Home() {
   const [clientId, setClientId] = useState('your-unique-user-id');
   const [tempClientId, setTempClientId] = useState(clientId);
 
-  function handlePlaidLinkSuccess() {
-    setToastMessage("You have successfully linked your account. If this was the real product, there would be more here, but it isn't. Thanks for participating in our prototype!");
+  function handlePlaidLinkSuccess(message: string) {
+    setToastMessage(message);
     setToastOpen(true);
   }
 
