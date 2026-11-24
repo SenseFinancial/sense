@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     try {
         const { accessToken, itemId, clientId } = await req.json();
         const jwt = await generateTransactionsJwt();
-        const response = await axios.get(
+        const { data: { transactionsUpdateStatus } } = await axios.get(
             `${process.env.TRANSACTIONS_ADDRESS}/beginTransactionsSync?accessToken=${accessToken}&itemId=${itemId}&clientId=${clientId}`,
             {
                 headers: {
@@ -20,19 +20,7 @@ export async function POST(req: NextRequest) {
             }
         );
 
-        switch (response.data.transactionsUpdateStatus) {
-            case TransactionsUpdateStatus.NotReady:
-            case TransactionsUpdateStatus.InitialUpdateComplete:
-            case TransactionsUpdateStatus.Unknown:
-                // do sync again in a moment
-                // for Unknown (and the others) ensure we have a threshold breaking point so we aren't looping forever
-                break;
-            case TransactionsUpdateStatus.HistoricalUpdateComplete:
-                // Transactions service has data
-                break;
-        }
-
-        return NextResponse.json({}, { status: 200 });
+        return NextResponse.json({ transactionsUpdateStatus }, { status: 200 });
     } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.response)
@@ -43,6 +31,6 @@ export async function POST(req: NextRequest) {
             console.log(error);
         }
 
-        return NextResponse.json({ error: 'Error generating link token' }, { status: 500 });
+        return NextResponse.json({ error: 'Error generating link token.' }, { status: 500 });
     }
 }

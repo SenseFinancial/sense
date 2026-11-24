@@ -2,6 +2,7 @@ import { Controller, Get, Query, Headers, UnauthorizedException, InternalServerE
 import { PlaidTransactionsService } from './plaid/plaidTransactionsService';
 import { Authentication } from './infrastructure/authentication';
 import { JOSEError } from 'jose/errors';
+import { PlaidError } from 'plaid';
 
 @Controller()
 export class AppController {
@@ -16,12 +17,24 @@ export class AppController {
       return {
         transactionsUpdateStatus: status
       };
-    } catch (error) {
+    } catch (error: any) {
+      console.log(error);
       if (error instanceof JOSEError) {
-        console.log(error);
         throw new UnauthorizedException('Authentication failed');
       }
-      console.log(error);
+
+      const plaidError = error.response?.data as PlaidError | undefined;
+      if (plaidError) {
+        throw new InternalServerErrorException({
+          error: {
+            message: plaidError.error_message,
+            type: plaidError.error_type,
+            code: plaidError.error_code,
+            display_message: plaidError.display_message,
+          },
+        });
+      }
+
       throw new InternalServerErrorException('Failed to sync transactions.');
     }
   }

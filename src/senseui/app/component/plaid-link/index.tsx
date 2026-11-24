@@ -4,6 +4,7 @@ import { PlaidLinkError, PlaidLinkOnEventMetadata, PlaidLinkOnExitMetadata, Plai
 import axios from 'axios';
 import Button from '@/app/component/button';
 import PlaidLinkErrors from './errors';
+import TransactionsUpdateStatus from '@/app/api/transactions/transactionsUpdateStatus';
 
 export default function PlaidLink({ onSuccess, onNonSuccess, clientId }: { onSuccess: () => void, onNonSuccess: (message: string) => void, clientId: string }) {
     const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -44,14 +45,29 @@ export default function PlaidLink({ onSuccess, onNonSuccess, clientId }: { onSuc
             if (response.data.error) {
                 onNonSuccess('There was an error getting an access token to use Plaid.');
             } else {
-                await axios.post('/api/transactions/transactionsSync', {
+                const { data: { transactionsUpdateStatus } } = await axios.post('/api/transactions/transactionsSync', {
                     accessToken: response.data.access_token,
                     itemId: response.data.item_id,
                     clientId: clientId
                 });
 
                 setShowConnectButton(false);
-                onSuccess();
+
+                switch (transactionsUpdateStatus) {
+                    case TransactionsUpdateStatus.NotReady:
+                        onNonSuccess("Plaid has started collecting your data but hasn't been able to report to us. Try again in 30 seconds for initial data or 4-5 minutes for all data.");
+                        break;
+                    case TransactionsUpdateStatus.InitialUpdateComplete:
+                        onNonSuccess("Plaid has collected some of your data but hasn't been able to collect the full historical set. Try again in 2-3 minutes.");
+                        break;
+                    case TransactionsUpdateStatus.HistoricalUpdateComplete:
+                        // Transactions service has all the data
+                        onSuccess();
+                        break;
+                    case TransactionsUpdateStatus.Unknown:
+                        onNonSuccess("Plaid reports an unknown status of collecting your data. Try again in 30 seconds for initial data or 4-5 minutes for all data.")
+                        break;
+                }
             }
         } catch (error: any) {
             onNonSuccess('There was an error getting an access token to use Plaid.');
