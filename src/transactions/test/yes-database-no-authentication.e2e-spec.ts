@@ -216,6 +216,25 @@ describe('AppController (e2e), ignore authentication, test database', () => {
       .expect(200, 'encryptedAccessToken');
   });
 
+  it('adds entity', async () => {
+    await request(app.getHttpServer())
+      .post('/addEntity')
+      .send({ providerEntityId: 'providerEntityIdy', clientId: 'clientIdy', accessToken: 'accessTokeny' })
+      .expect(201);
+
+    const entityResp = await pool.query('SELECT * FROM "entity"');
+    expect(entityResp.rowCount).toEqual(1);
+    expect(entityResp.rows[0].providerEntityId).toEqual('providerEntityIdy');
+    expect(entityResp.rows[0].transactionsUpdateStatus).toEqual('NO_UPDATE_REQUESTED');
+    expect(entityResp.rows[0].nextCursor).toEqual(null);
+    expect(entityResp.rows[0].lastRequestId).toEqual(null);
+    expect(entityResp.rows[0].clientId).toEqual('clientIdy');
+
+    const accessTokenPieces = entityResp.rows[0].accessToken.split(':');
+    const accessToken = decrypt(accessTokenPieces[0], accessTokenPieces[1], accessTokenPieces[2]);
+    expect(accessToken).toEqual('accessTokeny');
+  });
+
   let testingConfiguration = {
     getDatabaseUrl: () => { },
     getEncryptionKey: () => 'ebed12176f368c6781c26e4b02955ce5f23ce9fe91fe2d991dfc4aab79109b21',

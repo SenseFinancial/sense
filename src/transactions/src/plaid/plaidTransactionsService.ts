@@ -58,4 +58,8 @@ export class PlaidTransactionsService {
         this.logger.info(`Ending method getAccessTokenForClientId for clientId ${clientId}.`);
         return result;
     };
+
+    addEntity = async (clientId: string, accessToken: string, providerEntityId: string) => {
+        await this.database.addOrUpdateEntity(providerEntityId, 'NO_UPDATE_REQUESTED', null, null, accessToken, clientId);
+    };
 }

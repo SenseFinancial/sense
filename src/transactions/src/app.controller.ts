@@ -1,8 +1,9 @@
-import { Controller, Get, Query, Headers, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Query, Headers, UnauthorizedException, InternalServerErrorException, Post, Body } from '@nestjs/common';
 import { PlaidTransactionsService } from './plaid/plaidTransactionsService';
 import { Authentication } from './infrastructure/authentication';
 import { JOSEError } from 'jose/errors';
 import { PlaidError } from 'plaid';
+import AddEntityDto from './dto/AddEntityDto';
 
 @Controller()
 export class AppController {
@@ -52,6 +53,22 @@ export class AppController {
       }
       console.log(error);
       throw new InternalServerErrorException('Failed to get client ID.');
+    }
+  }
+
+  @Post('addEntity')
+  async addEntity(@Headers('authorization') token: string, @Body() addEntityDto: AddEntityDto) {
+    try {
+      await this.authentication.verifyJwt(token);
+
+      await this.transactionsService.addEntity(addEntityDto.clientId, addEntityDto.accessToken, addEntityDto.providerEntityId);
+    } catch (error) {
+      if (error instanceof JOSEError) {
+        console.log(error);
+        throw new UnauthorizedException('Authentication failed');
+      }
+      console.log(error);
+      throw new InternalServerErrorException('Failed to add entity.');
     }
   }
 }
