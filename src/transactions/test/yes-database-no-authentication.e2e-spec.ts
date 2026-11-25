@@ -97,7 +97,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     expect(oneAccount.name).toEqual('Plaid Checking');
     expect(oneAccount.type).toEqual('depository');
     expect(oneAccount.subtype).toEqual('checking');
-    expect(oneAccount.balance).toEqual(110);
+    expect(oneAccount.balance).toEqual("110"); // node-postgres intentionally makes this a string to prevent precision loss
     expect(oneAccount.balanceCurrencyCode).toEqual('CAD');
 
     const twoAccount = accountResp.rows.find((row: any) => row.providerAccountId === "WnWQW8XnEPI1oGJ3yeRkijE98ww4WwFPwdgmL");
@@ -169,7 +169,7 @@ describe('AppController (e2e), ignore authentication, test database', () => {
     expect(accountResp.rows[0].name).toEqual('Plaid Checking1');
     expect(accountResp.rows[0].type).toEqual('depository1');
     expect(accountResp.rows[0].subtype).toEqual('checking1');
-    expect(accountResp.rows[0].balance).toEqual(130);
+    expect(accountResp.rows[0].balance).toEqual("130"); // node-postgres intentionally makes this a string to prevent precision loss
     expect(accountResp.rows[0].balanceCurrencyCode).toEqual('CA1');
 
     const transactionsResp = await pool.query(`SELECT * FROM transaction`);
