@@ -9,7 +9,7 @@ const config = new Configuration({
     baseOptions: {
         headers: {
             'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
-            'PLAID-SECRET': process.env.PLAID_SECRET_SANDBOX,
+            'PLAID-SECRET': process.env.PLAID_SECRET,
         },
     },
 });
@@ -43,8 +43,9 @@ export async function POST(req: NextRequest) {
             products: [
                 Products.Transactions,
             ],
-            country_codes: [CountryCode.Ca],
-            language: 'en'
+            country_codes: [CountryCode.Ca, CountryCode.Us],
+            language: 'en',
+            redirect_uri: 'https://localhost:3000',
         });
         return NextResponse.json({ link_token: response.data.link_token });
     } catch (error) {

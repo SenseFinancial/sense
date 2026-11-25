@@ -10,9 +10,7 @@ export class PlaidClientApiWrapperService {
     constructor(private readonly configuration: Configuration) {
         const env = configuration.getPlaidEnv();
         const clientId = configuration.getPlaidClientId();
-        const secretProduction = configuration.getPlaidSecretProduction();
-        const secretSandbox = configuration.getPlaidSecretSandbox();
-        const secret = env === 'production' ? secretProduction : secretSandbox;
+        const secret = configuration.getPlaidSecret();
 
         const plaidConfiguration = new PlaidConfiguration({
             basePath: PlaidEnvironments[env || ""],

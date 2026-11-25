@@ -6,8 +6,7 @@ export class Configuration {
     databaseUrl: string | undefined;
     plaidEnv: string | undefined;
     plaidClientId: string | undefined;
-    plaidSecretProduction: string | undefined;
-    plaidSecretSandbox: string | undefined;
+    plaidSecret: string | undefined;
     jwtIssuer: string | undefined;
     jwtAudience: string | undefined;
     jwtSecret: string | undefined;
@@ -17,8 +16,7 @@ export class Configuration {
         this.databaseUrl = configService.get<string>("DATABASE_URL");
         this.plaidEnv = configService.get<string>('PLAID_ENV');
         this.plaidClientId = configService.get<string>('PLAID_CLIENT_ID');
-        this.plaidSecretProduction = configService.get<string>('PLAID_SECRET_PRODUCTION');
-        this.plaidSecretSandbox = configService.get<string>('PLAID_SECRET_SANDBOX');
+        this.plaidSecret = configService.get<string>('PLAID_SECRET');
         this.jwtIssuer = configService.get<string>('JWT_ISSUER');
         this.jwtAudience = configService.get<string>('JWT_AUDIENCE');
         this.jwtSecret = configService.get<string>('JWT_SECRET');
@@ -32,8 +30,7 @@ export class Configuration {
     getDatabaseUrl = () => this.databaseUrl;
     getPlaidEnv = () => this.plaidEnv;
     getPlaidClientId = () => this.plaidClientId;
-    getPlaidSecretProduction = () => this.plaidSecretProduction;
-    getPlaidSecretSandbox = () => this.plaidSecretSandbox;
+    getPlaidSecret = () => this.plaidSecret;
     getJwtIssuer = () => this.jwtIssuer;
     getJwtAudience = () => this.jwtAudience;
     getJwtSecret = () => this.jwtSecret;
